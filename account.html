@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investment Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <style >
+      /* General Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+  padding: 20px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.header {
+  background: linear-gradient(90deg, #4CAF50, #1E88E5);
+  color: white;
+  text-align: center;
+  padding: 20px;
+  border-radius: 8px 8px 0 0;
+}
+
+.header h1 {
+  font-size: 2rem;
+}
+
+.header p {
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+.balance {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.balance h2 {
+  font-size: 1.5rem;
+}
+
+.balance p {
+  font-size: 2rem;
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.actions button {
+  background: #1E88E5;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.actions button:hover {
+  background: #1565C0;
+}
+
+.market-ticker {
+  margin: 20px 0;
+  background: #f7fbfc;
+  padding: 10px;
+  border-left: 5px solid #4CAF50;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative;
+}
+
+.market-ticker p {
+  animation: ticker 15s linear infinite;
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.investment-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.investment {
+  background: #f9f9f9;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.investment h3 {
+  margin-bottom: 10px;
+}
+
+.investment p {
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+
+.investment button {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.investment button:hover {
+  background: #388E3C;
+}
+
+  </style>
+  <script type="module" src="script.js"></script>
+  <script >
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+// Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
+  authDomain: "techzone-c96c0.firebaseapp.com",
+  projectId: "techzone-c96c0",
+  storageBucket: "techzone-c96c0.appspot.com",
+  messagingSenderId: "399698120752",
+  appId: "1:399698120752:web:40821d2140cd0d860a1df5",
+  databaseURL: "https://techzone-c96c0-default-rtdb.firebaseio.com/",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+
+// Redirect if not logged in and fetch user details
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Display user email
+    document.getElementById("userEmail").querySelector("span").innerText = user.email;
+
+    // Fetch and display user balance
+    fetchBalance(user.uid);
+  } else {
+    window.location.href = "login.html"; // Redirect to login
+  }
+});
+
+// Fetch User Balance
+function fetchBalance(userId) {
+  const balanceRef = ref(database, `users/${userId}/balance`);
+  onValue(balanceRef, (snapshot) => {
+    const balance = snapshot.val() || 0; // Default to 0 if no balance found
+    document.getElementById("userBalance").innerText = `₦${balance.toFixed(2)}`;
+  });
+}
+
+  </script>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Investment Dashboard</h1>
+      <p id="userEmail">Logged in as: <span>Loading...</span></p>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard">
+      <!-- Balance Display -->
+      <div class="balance">
+        <h2>Current Balance:</h2>
+        <p id="userBalance">₦0.00</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="actions">
+        <a href="add-fund.html"><button>Add Fund</button></a>
+        <a href="withdraw.html"><button>Withdraw</button></a>
+        <a href="investment.html"><button>Invest</button></a>
+      </div>
+
+      <!-- Scrolling Market News -->
+      <div class="market-ticker">
+        <p>Market News: Tech stocks up 3%, Crypto soaring, Real Estate steady.</p>
+      </div>
+
+      <!-- Investment List -->
+      <div class="investment-list">
+        <div class="investment">
+          <h3>Green Energy Growth Fund</h3>
+          <p>Returns: 12% annually</p>
+          <a href="green.html"><button>Invest</button></a>
+        </div>
+        <div class="investment">
+          <h3>Tech Innovation Fund</h3>
+          <p>Returns: 15% annually</p>
+          <a href="tech.html"><button>Invest</button></a>
+        </div>
+        <div class="investment">
+          <h3>Global Real Estate Fund</h3>
+          <p>Returns: 8% annually</p>
+          <a href="global.html"><button>Invest</button></a>
+        </div>
+        <div class="investment">
+          <h3>Crypto Growth Portfolio</h3>
+          <p>Returns: 20% annually</p>
+          <a href="crypto.html"><button>Invest</button></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
