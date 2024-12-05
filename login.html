@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Platform Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 400px;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .footer {
+            margin-top: 20px;
+        }
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .social-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .social-button {
+            width: 48%;
+            padding: 10px;
+            font-size: 16px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .google-btn {
+            background-color: #db4437;
+        }
+        .google-btn:hover {
+            background-color: #c5382f;
+        }
+        .facebook-btn {
+            background-color: #4267b2;
+        }
+        .facebook-btn:hover {
+            background-color: #365899;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Login to Your Account</h2>
+        <div class="error-message" id="error-message"></div>
+
+        <div class="input-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="Enter your email" required>
+        </div>
+        <div class="input-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Enter your password" required>
+        </div>
+
+        <button class="button" id="login-btn">Login</button>
+
+        <div class="social-buttons">
+            <button class="social-button google-btn" id="google-signin">Sign in with Google</button>
+            <button class="social-button facebook-btn" id="facebook-signin">Sign in with Facebook</button>
+        </div>
+
+        <div class="footer">
+            <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+            <p><a href="forgot.html">Forgot Password?</a></p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
+            authDomain: "techzone-c96c0.firebaseapp.com",
+            projectId: "techzone-c96c0",
+            storageBucket: "techzone-c96c0.firebasestorage.app",
+            messagingSenderId: "399698120752",
+            appId: "1:399698120752:web:40821d2140cd0d860a1df5",
+            measurementId: "G-Z7VFYH20LH"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+
+        // Email/Password Login
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                window.location.href = 'account.html'; // Redirect to account page on success
+            } catch (error) {
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage.innerText = "No account found with this email. Please sign up.";
+                    setTimeout(() => window.location.href = 'signup.html', 3000); // Redirect to signup after 3 seconds
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage.innerText = "Incorrect password. Please try again.";
+                } else {
+                    errorMessage.innerText = "Error logging in. Please try again.";
+                }
+            }
+        });
+
+        // Google Sign-In
+        document.getElementById('google-signin').addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+                window.location.href = 'account.html'; // Redirect to account page on success
+            } catch (error) {
+                console.log(error);
+                document.getElementById('error-message').innerText = "Google login failed. Please try again.";
+            }
+        });
+
+        // Facebook Sign-In
+        document.getElementById('facebook-signin').addEventListener('click', async () => {
+            const provider = new FacebookAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+                window.location.href = 'account.html'; // Redirect to account page on success
+            } catch (error) {
+                console.log(error);
+                document.getElementById('error-message').innerText = "Facebook login failed. Please try again.";
+            }
+        });
+    </script>
+</body>
+</html>
