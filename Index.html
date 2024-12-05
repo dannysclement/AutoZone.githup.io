@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trusted Investment Platform</title>
+    <style>
+        /* Reset and Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header img {
+            height: 50px;
+            margin: 0 10px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-left: 10px;
+            text-align: center;
+        }
+
+        header .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Hero Section */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(to bottom, #4CAF50, #45a049);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hero h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+        }
+
+        .hero .cta-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .hero .cta-buttons a {
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            background-color: #333;
+            padding: 15px 25px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .hero .cta-buttons a:hover {
+            background-color: #222;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .features h2 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .features .feature-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .features .feature-item {
+            max-width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .features .feature-item h3 {
+            color: #4CAF50;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            background-color: #eee;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .testimonials h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .testimonials .testimonial {
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        footer p {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .hero h2 {
+                font-size: 28px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .features .feature-item {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="logo-container">
+            <img src="https://www.cbn.gov.ng/images/cbnlogo.png" alt="CBN Logo">
+            <img src="https://www.ndic.gov.ng/wp-content/uploads/2020/07/NDIC_LOGO.png" alt="NDIC Logo">
+        </div>
+        <h1>Trusted Investment Platform</h1>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <h2>Invest Smartly with Us</h2>
+        <p>
+            Join a trusted platform that offers daily returns and instant withdrawal of your earnings anytime,
+            anywhere. Your investments are secure, and refunds are instant. Start growing your wealth today!
+        </p>
+        <div class="cta-buttons">
+            <a href="login.html">Get Started</a>
+            <a href="chatus.html">Support</a>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="features">
+        <h2>Why Choose Us?</h2>
+        <div class="feature-list">
+            <div class="feature-item">
+                <h3>Secure Investments</h3>
+                <p>Your funds are protected and backed by regulatory bodies.</p>
+            </div>
+            <div class="feature-item">
+                <h3>Daily Returns</h3>
+                <p>Earn consistent daily income with no hidden charges.</p>
+            </div>
+            <div class="feature-item">
+                <h3>Instant Withdrawals</h3>
+                <p>Withdraw your earnings instantly to your bank account.</p>
+            </div>
+            <div class="feature-item">
+                <h3>24/7 Support</h3>
+                <p>Our team is always here to assist you, anytime.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <h2>What Our Users Say</h2>
+        <p class="testimonial">"I love this platform! It's easy to use, and the returns are amazing!"</p>
+        <p class="testimonial">"I trust this company with my investments. It's been a game-changer for me."</p>
+    </section>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; 2024 Trusted Investment Platform. All rights reserved.</p>
+        <p>Don't forget to <a href="rate.html">rate us 5 stars</a> and spread the word!</p>
+        <p>Contact us at <a href="mailto:support@investmentplatform.com">support@investmentplatform.com</a></p>
+    </footer>
+</body>
+
+</html>
