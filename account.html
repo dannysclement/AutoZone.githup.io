@@ -152,38 +152,38 @@ const firebaseConfig = {
   apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
   authDomain: "techzone-c96c0.firebaseapp.com",
   projectId: "techzone-c96c0",
-  storageBucket: "techzone-c96c0.appspot.com",
+  storageBucket: "techzone-c96c0.firebaseapp.com",
   messagingSenderId: "399698120752",
   appId: "1:399698120752:web:40821d2140cd0d860a1df5",
-  databaseURL: "https://techzone-c96c0-default-rtdb.firebaseio.com/",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
 
-// Redirect if not logged in and fetch user details
+// Redirect if not logged in
+let timeout = setTimeout(() => {
+  alert("Please log in again.");
+  window.location.href = "login.html";
+}, 3000);
+
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // Display user email
-    document.getElementById("userEmail").querySelector("span").innerText = user.email;
+    clearTimeout(timeout);
 
-    // Fetch and display user balance
-    fetchBalance(user.uid);
+    // Display logged-in email
+    document.getElementById("emailDisplay").innerText = user.email;
+
+    // Fetch balance in real-time
+    const balanceRef = ref(database, `users/${user.uid}/balance`);
+    onValue(balanceRef, (snapshot) => {
+      const balance = snapshot.val() || 0;
+      document.getElementById("userBalance").innerText = `₦${balance.toFixed(2)}`;
+    });
   } else {
-    window.location.href = "login.html"; // Redirect to login
+    window.location.href = "login.html";
   }
 });
-
-// Fetch User Balance
-function fetchBalance(userId) {
-  const balanceRef = ref(database, `users/${userId}/balance`);
-  onValue(balanceRef, (snapshot) => {
-    const balance = snapshot.val() || 0; // Default to 0 if no balance found
-    document.getElementById("userBalance").innerText = `₦${balance.toFixed(2)}`;
-  });
-}
 
   </script>
 </head>
@@ -192,7 +192,7 @@ function fetchBalance(userId) {
     <!-- Header -->
     <div class="header">
       <h1>Investment Dashboard</h1>
-      <p id="userEmail">Logged in as: <span>Loading...</span></p>
+      <p id="userEmail">Logged in as: <span id="emailDisplay">Loading...</span></p>
     </div>
 
     <!-- Main Dashboard -->
