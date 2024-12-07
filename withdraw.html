@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Withdrawal Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .form-group select {
+      cursor: pointer;
+    }
+
+    .form-group .wallet-options,
+    .form-group .bank-options {
+      display: none;
+    }
+
+    .form-group button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .form-group button:hover {
+      background-color: #45a049;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+    }
+
+    .form-group .balance-status {
+      margin-top: 10px;
+      font-size: 14px;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Withdrawal Form</h1>
+    <form id="withdrawForm">
+      <div class="form-group">
+        <label for="withdrawTo">Withdraw to:</label>
+        <select id="withdrawTo" name="withdrawTo" onchange="toggleOptions()">
+          <option value="wallet">Wallet</option>
+          <option value="bank">Bank</option>
+        </select>
+      </div>
+
+      <!-- Wallet Section -->
+      <div class="form-group wallet-options">
+        <label for="walletId">Wallet ID (16 digits):</label>
+        <input type="text" id="walletId" name="walletId" placeholder="Enter Wallet ID" required>
+        <div class="error" id="walletIdError"></div>
+
+        <label for="walletName">Wallet Name:</label>
+        <input type="text" id="walletName" name="walletName" placeholder="Enter Wallet Name" required>
+      </div>
+
+      <!-- Bank Section -->
+      <div class="form-group bank-options">
+        <label for="bank">Select Bank:</label>
+        <select id="bank" name="bank" required>
+          <option value="">Select Bank</option>
+          <option value="Access Bank">Access Bank Plc</option>
+          <option value="Fidelity Bank">Fidelity Bank Plc</option>
+          <option value="First City Monument Bank">First City Monument Bank</option>
+          <option value="First Bank of Nigeria">First Bank of Nigeria Limited</option>
+          <option value="Guaranty Trust Holding Company">Guaranty Trust Holding Company</option>
+          <option value="Union Bank">Union Bank of Nigeria</option>
+          <option value="United Bank for Africa">United Bank for Africa</option>
+          <option value="Zenith Bank">Zenith Bank Plc</option>
+          <option value="Citibank">Citibank Nigeria Limited</option>
+          <option value="Ecobank">Ecobank Nigeria</option>
+          <option value="Keystone Bank">Keystone Bank Limited</option>
+          <option value="Optimus Bank">Optimus Bank Limited</option>
+          <option value="Polaris Bank">Polaris Bank Limited</option>
+          <option value="Stanbic IBTC Bank">Stanbic IBTC Bank Plc</option>
+          <option value="Standard Chartered">Standard Chartered</option>
+          <option value="Sterling Bank">Sterling Bank Plc</option>
+          <option value="Titan Trust Bank">Titan Trust Bank Limited</option>
+          <option value="Unity Bank">Unity Bank Plc</option>
+          <option value="Wema Bank">Wema Bank Plc</option>
+        </select>
+
+        <label for="accountNumber">Account Number (10 digits):</label>
+        <input type="text" id="accountNumber" name="accountNumber" placeholder="Enter Account Number" required>
+        <div class="error" id="accountNumberError"></div>
+
+        <label for="accountName">Account Name:</label>
+        <input type="text" id="accountName" name="accountName" placeholder="Enter Account Name" required>
+      </div>
+
+      <div class="form-group">
+        <button type="submit">Withdraw</button>
+        <div class="balance-status" id="balanceStatus"></div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Firebase Integration -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
+      authDomain: "techzone-c96c0.firebaseapp.com",
+      projectId: "techzone-c96c0",
+      storageBucket: "techzone-c96c0.firebasestorage.app",
+      messagingSenderId: "399698120752",
+      appId: "1:399698120752:web:40821d2140cd0d860a1df5",
+      measurementId: "G-Z7VFYH20LH"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const analytics = getAnalytics(app);
+
+    // Firebase document reference
+    let userBalance = 0; // Placeholder for user balance
+
+    // Function to toggle between wallet and bank options
+    function toggleOptions() {
+      var withdrawTo = document.getElementById("withdrawTo").value;
+      var walletOptions = document.querySelector(".wallet-options");
+      var bankOptions = document.querySelector(".bank-options");
+
+      if (withdrawTo === "wallet") {
+        walletOptions.style.display = "block";
+        bankOptions.style.display = "none";
+      } else if (withdrawTo === "bank") {
+        walletOptions.style.display = "none";
+        bankOptions.style.display = "block";
+      }
+    }
+
+    // Function to validate wallet ID (16 digits)
+    function validateWalletId(walletId) {
+      const walletIdPattern = /^\d{16}$/;
+      return walletIdPattern.test(walletId);
+    }
+
+    // Function to validate account number (10 digits)
+    function validateAccountNumber(accountNumber) {
+      const accountNumberPattern = /^\d{10}$/;
+      return accountNumberPattern.test(accountNumber);
+    }
+
+    // Event listener for form submission
+    document.getElementById("withdrawForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const withdrawTo = document.getElementById("withdrawTo").value;
+      const walletId = document.getElementById("walletId").value;
+      const accountNumber = document.getElementById("accountNumber").value;
+
+      // Validate wallet ID and account number
+      let valid = true;
+      if (withdrawTo === "wallet" && !validateWalletId(walletId)) {
+        document.getElementById("walletIdError").innerText = "Wallet ID must be 16 digits.";
+        valid = false;
+      }
+
+      if (withdrawTo === "bank" && !validateAccountNumber(accountNumber)) {
+        document.getElementById("accountNumberError").innerText = "Account number must be 10 digits.";
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      // Fetch user balance from Firebase
+      const userId = "userId"; // Placeholder for actual logged-in user ID
+      const docRef = doc(db, "users", userId);
+      const userDoc = await getDoc(docRef);
+
+      if (userDoc.exists()) {
+        userBalance = userDoc.data().balance;
+        const withdrawAmount = 1000; // Placeholder for the amount to withdraw
+
+        // Check if the balance is sufficient
+        if (userBalance >= withdrawAmount) {
+          document.getElementById("balanceStatus").innerText = "Withdrawal Successful!";
+        } else {
+          document.getElementById("balanceStatus").innerText = "Insufficient funds.";
+        }
+      } else {
+        console.error("No such document!");
+        document.getElementById("balanceStatus").innerText = "Error retrieving balance.";
+      }
+    });
+  </script>
+</body>
+</html>
