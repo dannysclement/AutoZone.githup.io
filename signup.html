@@ -99,6 +99,12 @@
             display: none;
         }
 
+        .success-message {
+            color: green;
+            margin-top: 5px;
+            display: none;
+        }
+
         .footer {
             margin-top: 15px;
             text-align: center;
@@ -111,109 +117,204 @@
     </style>
 </head>
 <body>
-    <div class="signup-container">
-        <h2>Sign Up</h2>
-        <div id="errorMsg" class="error-message"></div>
-        <div class="input-field">
-            <label for="username">Username</label>
-            <input type="text" id="username" placeholder="Enter your username">
-        </div>
-        <div class="input-field">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Enter your email">
-        </div>
-        <div class="input-field">
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Enter your password">
-        </div>
-        <button class="signup-btn" id="signupBtn">Sign Up</button>
-        <button class="google-signup" id="googleSignupBtn">Sign Up with Google</button>
-        <button class="facebook-signup" id="facebookSignupBtn">Sign Up with Facebook</button>
 
-        <div class="footer">
-            <p>Already have an account? <a href="login.html">Login</a></p>
-        </div>
+<div class="signup-container">
+    <h2>Sign Up</h2>
+    <div id="errorMsg" class="error-message"></div>
+    <div id="successMsg" class="success-message"></div>
+
+    <div class="input-field">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter your username">
+    </div>
+    <div class="input-field">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter your email">
+    </div>
+    <div class="input-field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password">
+    </div>
+    <div class="input-field">
+        <label for="phone">Phone Number (+234)</label>
+        <input type="text" id="phone" placeholder="Enter your 10-digit phone number">
+    </div>
+    <div class="input-field">
+        <label for="referral">Referral Code (Optional)</label>
+        <input type="text" id="referral" placeholder="Enter referral code">
     </div>
 
-    <!-- Firebase Integration -->
-    <script type="module">
-      // Import the functions you need from the SDKs you need
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-      import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
+    <button class="signup-btn" id="signupBtn">Sign Up</button>
+    <button class="google-signup" id="googleSignupBtn">Sign Up with Google</button>
+    <button class="facebook-signup" id="facebookSignupBtn">Sign Up with Facebook</button>
 
-      // Your web app's Firebase configuration
-      const firebaseConfig = {
+    <div class="footer">
+        <p>Already have an account? <a href="login.html">Login</a></p>
+    </div>
+</div>
+
+<!-- Firebase Integration -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+    const firebaseConfig = {
         apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
         authDomain: "techzone-c96c0.firebaseapp.com",
         projectId: "techzone-c96c0",
         storageBucket: "techzone-c96c0.firebasestorage.app",
         messagingSenderId: "399698120752",
-        appId: "1:399698120752:web:40821d2140cd0d860a1df5",
-        measurementId: "G-Z7VFYH20LH"
-      };
+        appId: "1:399698120752:web:40821d2140cd0d860a1df5"
+    };
 
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const analytics = getAnalytics(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-      const errorMsg = document.getElementById('errorMsg');
-      const signupBtn = document.getElementById('signupBtn');
-      const googleSignupBtn = document.getElementById('googleSignupBtn');
-      const facebookSignupBtn = document.getElementById('facebookSignupBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+    const usernameInput = document.getElementById('username');
+    const phoneInput = document.getElementById('phone');
+    const referralInput = document.getElementById('referral');
 
-      const errorMessages = {
-        "auth/email-already-in-use": "This email is already registered. Please try logging in.",
-        "auth/invalid-email": "Invalid email format. Please check and try again.",
-        "auth/weak-password": "Password should be at least 6 characters.",
-        "auth/missing-email": "Please enter an email address.",
-        "auth/internal-error": "An unexpected error occurred. Please try again."
-      };
+    let isUsernameAvailable = true;
+    let isPhoneAvailable = true;
+    let isValidReferral = false;
+    let referralUser = null;
 
-      function showError(message) {
-        errorMsg.textContent = message;
-        errorMsg.style.display = 'block';
-      }
+    // Check if username is available
+    usernameInput.addEventListener('input', async () => {
+        const username = usernameInput.value.trim();
+        if (username) {
+            try {
+                const userQuery = query(collection(db, "users"), where("username", "==", username));
+                const userSnapshot = await getDocs(userQuery);
+                if (!userSnapshot.empty) {
+                    isUsernameAvailable = false;
+                    errorMsg.textContent = "Username already exists, try another.";
+                    errorMsg.style.display = "block";
+                } else {
+                    isUsernameAvailable = true;
+                    errorMsg.style.display = "none";
+                }
+            } catch (error) {
+                console.error("Error checking username availability:", error);
+            }
+        }
+    });
 
-      signupBtn.addEventListener('click', () => {
-          const email = document.getElementById('email').value;
-          const password = document.getElementById('password').value;
+    // Check if phone number is available
+    phoneInput.addEventListener('input', async () => {
+        const phone = phoneInput.value.trim();
+        if (phone.length === 10 && !isNaN(phone)) {
+            try {
+                const phoneQuery = query(collection(db, "users"), where("phone", "==", `+234${phone}`));
+                const phoneSnapshot = await getDocs(phoneQuery);
+                if (!phoneSnapshot.empty) {
+                    isPhoneAvailable = false;
+                    errorMsg.textContent = "Phone number already exists.";
+                    errorMsg.style.display = "block";
+                } else {
+                    isPhoneAvailable = true;
+                    errorMsg.style.display = "none";
+                }
+            } catch (error) {
+                console.error("Error checking phone number availability:", error);
+            }
+        }
+    });
 
-          createUserWithEmailAndPassword(auth, email, password)
-            .then(() => {
-              alert('Sign-up successful!');
-              window.location.href = 'account.html';
-            })
-            .catch((error) => {
-              const errorMessage = errorMessages[error.code] || "An error occurred. Please try again.";
-              showError(errorMessage);
-            });
-      });
+    // Check if referral code is valid
+    referralInput.addEventListener('input', async () => {
+        const referralCode = referralInput.value.trim();
+        if (referralCode) {
+            try {
+                const refDoc = await getDoc(doc(db, "users", referralCode));
+                if (refDoc.exists()) {
+                    isValidReferral = true;
+                    referralUser = refDoc.data();
+                } else {
+                    isValidReferral = false;
+                }
+            } catch (error) {
+                console.error("Error validating referral code:", error);
+            }
+        }
+    });
 
-      googleSignupBtn.addEventListener('click', () => {
-          const provider = new GoogleAuthProvider();
-          signInWithPopup(auth, provider)
-            .then(() => {
-              alert('Signed up with Google!');
-              window.location.href = 'account.html';
-            })
-            .catch(() => {
-              showError("Google Sign-Up Failed. Please try again.");
-            });
-      });
+    // Sign Up with Email
+    document.getElementById('signupBtn').addEventListener('click', async () => {
+        const username = usernameInput.value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const phone = phoneInput.value.trim();
+        const referralCode = referralInput.value.trim();
 
-      facebookSignupBtn.addEventListener('click', () => {
-          const provider = new FacebookAuthProvider();
-          signInWithPopup(auth, provider)
-            .then(() => {
-              alert('Signed up with Facebook!');
-              window.location.href = 'account.html';
-            })
-            .catch(() => {
-              showError("Facebook Sign-Up Failed. Please try again.");
-            });
-      });
-    </script>
+        if (isUsernameAvailable && isPhoneAvailable) {
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Store user data in Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    username: username,
+                    email: email,
+                    phone: `+234${phone}`,
+                    referralCode: referralCode || "",
+                    balance: 0
+                });
+
+                // Handle referral bonus
+                if (isValidReferral && referralCode) {
+                    const referrerBalance = referralUser.balance || 0;
+                    await updateDoc(doc(db, "users", referralUser.uid), { balance: referrerBalance + 10 });
+                }
+
+                successMsg.textContent = "Signup successful! Please check your email to verify.";
+                successMsg.style.display = "block";
+                errorMsg.style.display = "none";
+            } catch (error) {
+                errorMsg.textContent = error.message;
+                errorMsg.style.display = "block";
+                successMsg.style.display = "none";
+            }
+        } else {
+            errorMsg.textContent = "Please fix errors before submitting.";
+            errorMsg.style.display = "block";
+        }
+    });
+
+    // Google Sign-Up
+    document.getElementById('googleSignupBtn').addEventListener('click', async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            successMsg.textContent = `Welcome, ${user.displayName}!`;
+            successMsg.style.display = "block";
+            errorMsg.style.display = "none";
+        } catch (error) {
+            errorMsg.textContent = error.message;
+            errorMsg.style.display = "block";
+        }
+    });
+
+    // Facebook Sign-Up
+    document.getElementById('facebookSignupBtn').addEventListener('click', async () => {
+        const provider = new FacebookAuthProvider();
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            successMsg.textContent = `Welcome, ${user.displayName}!`;
+            successMsg.style.display = "block";
+            errorMsg.style.display = "none";
+        } catch (error) {
+            errorMsg.textContent = error.message;
+            errorMsg.style.display = "block";
+        }
+    });
+</script>
+
 </body>
 </html>
