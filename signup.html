@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Investissement Platform Sign Up</title>
     <style>
-        /* Styling */
+        /* General styling */
         * {
             margin: 0;
             padding: 0;
@@ -19,6 +19,44 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            flex-direction: column;
+        }
+
+        /* Welcome message with typing and scrolling effect */
+        .welcome-message-wrapper {
+            width: 100%;
+            overflow: hidden; /* Hide overflowing text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 40px;
+        }
+
+        .welcome-message {
+            display: inline-block;
+            white-space: nowrap;
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+            animation: typing 5s steps(50) 0s 1, scrollMessage 20s linear infinite;
+        }
+
+        @keyframes typing {
+            0% {
+                width: 0;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+
+        @keyframes scrollMessage {
+            0% {
+                transform: translateX(100%); /* Start from right */
+            }
+            100% {
+                transform: translateX(-100%); /* End at left */
+            }
         }
 
         .signup-container {
@@ -28,12 +66,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             max-width: 400px;
             width: 100%;
-        }
-
-        .signup-container h2 {
             text-align: center;
-            color: #333;
-            margin-bottom: 20px;
         }
 
         .input-field {
@@ -55,16 +88,13 @@
             font-size: 16px;
         }
 
-        .signup-btn, .google-signup, .facebook-signup {
+        .signup-btn {
             width: 100%;
             padding: 10px;
             border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
             margin-top: 10px;
-        }
-
-        .signup-btn {
             background-color: #28a745;
             color: white;
             border: none;
@@ -72,6 +102,15 @@
 
         .signup-btn:hover {
             background-color: #218838;
+        }
+
+        .google-signup, .facebook-signup {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
         }
 
         .google-signup {
@@ -118,6 +157,15 @@
     </style>
 </head>
 <body>
+
+    <!-- Welcome Message -->
+    <div class="welcome-message-wrapper">
+        <div class="welcome-message">
+            You are welcome! By using our platform, you will get discount rates when you invest with us. Thanks again! Our platform is easy to use, secure, and offers a great return on investment. Join us today and start earning.
+        </div>
+    </div>
+
+    <!-- Signup Form -->
     <div class="signup-container">
         <h2>Sign Up</h2>
         <div id="errorMsg" class="error-message"></div>
@@ -223,25 +271,19 @@
 
                 try {
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    const user = userCredential.user;
-
-                    // Store user data in Firestore
-                    await setDoc(doc(db, "users", user.uid), {
+                    await setDoc(doc(db, "users", userCredential.user.uid), {
                         username: username,
                         email: email,
                         phone: `+234${phone}`,
-                        balance: 0
                     });
 
-                    successMsg.textContent = "Sign-up successful!";
+                    successMsg.textContent = "Account successfully created!";
                     successMsg.style.display = "block";
-
                     setTimeout(() => {
                         window.location.href = "account.html";
                     }, 2000);
                 } catch (error) {
-                    console.error("Error during sign-up:", error);
-                    errorMsg.textContent = "An error occurred during sign-up.";
+                    errorMsg.textContent = "An error occurred while creating your account.";
                     errorMsg.style.display = "block";
                 }
             } else {
@@ -250,99 +292,54 @@
             }
         });
 
-        // Google Sign-up
-        const googleProvider = new GoogleAuthProvider();
+        // Google sign-up
         document.getElementById('googleSignupBtn').addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
             try {
-                const result = await signInWithPopup(auth, googleProvider);
+                const result = await signInWithPopup(auth, provider);
                 const user = result.user;
+                const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.uid);
+                await setDoc(doc(db, "users", userCredential.user.uid), {
+                    username: user.displayName,
+                    email: user.email,
+                    phone: user.phoneNumber || "",
+                });
 
-                // Ask for username after Google login
-                const username = prompt("Enter your username:");
-                const email = user.email;
-
-                if (username) {
-                    const { usernameExists, emailExists, phoneExists } = await checkIfExists(username, email, "");
-
-                    if (usernameExists) {
-                        errorMsg.textContent = "Username already exists. Please use another.";
-                        errorMsg.style.display = "block";
-                        return;
-                    }
-                    if (emailExists) {
-                        errorMsg.textContent = "This email is already associated with another account. Please try logging in or use a different email.";
-                        errorMsg.style.display = "block";
-                        return;
-                    }
-
-                    // Store user data in Firestore
-                    await setDoc(doc(db, "users", user.uid), {
-                        username: username,
-                        email: email,
-                        phone: "",
-                        balance: 0
-                    });
-
-                    successMsg.textContent = "Sign-up successful!";
-                    successMsg.style.display = "block";
-
-                    setTimeout(() => {
-                        window.location.href = "account.html";
-                    }, 2000);
-                }
+                successMsg.textContent = "Account successfully created with Google!";
+                successMsg.style.display = "block";
+                setTimeout(() => {
+                    window.location.href = "account.html";
+                }, 2000);
             } catch (error) {
-                console.error("Google sign-up error:", error);
-                errorMsg.textContent = "An error occurred with Google sign-up.";
+                errorMsg.textContent = "An error occurred during Google sign-up.";
                 errorMsg.style.display = "block";
             }
         });
 
-        // Facebook Sign-up
-        const facebookProvider = new FacebookAuthProvider();
+        // Facebook sign-up
         document.getElementById('facebookSignupBtn').addEventListener('click', async () => {
+            const provider = new FacebookAuthProvider();
             try {
-                const result = await signInWithPopup(auth, facebookProvider);
+                const result = await signInWithPopup(auth, provider);
                 const user = result.user;
+                const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.uid);
+                await setDoc(doc(db, "users", userCredential.user.uid), {
+                    username: user.displayName,
+                    email: user.email,
+                    phone: user.phoneNumber || "",
+                });
 
-                // Ask for username after Facebook login
-                const username = prompt("Enter your username:");
-                const email = user.email;
-
-                if (username) {
-                    const { usernameExists, emailExists, phoneExists } = await checkIfExists(username, email, "");
-
-                    if (usernameExists) {
-                        errorMsg.textContent = "Username already exists. Please use another.";
-                        errorMsg.style.display = "block";
-                        return;
-                    }
-                    if (emailExists) {
-                        errorMsg.textContent = "This email is already associated with another account. Please try logging in or use a different email.";
-                        errorMsg.style.display = "block";
-                        return;
-                    }
-
-                    // Store user data in Firestore
-                    await setDoc(doc(db, "users", user.uid), {
-                        username: username,
-                        email: email,
-                        phone: "",
-                        balance: 0
-                    });
-
-                    successMsg.textContent = "Sign-up successful!";
-                    successMsg.style.display = "block";
-
-                    setTimeout(() => {
-                        window.location.href = "account.html";
-                    }, 2000);
-                }
+                successMsg.textContent = "Account successfully created with Facebook!";
+                successMsg.style.display = "block";
+                setTimeout(() => {
+                    window.location.href = "account.html";
+                }, 2000);
             } catch (error) {
-                console.error("Facebook sign-up error:", error);
-                errorMsg.textContent = "An error occurred with Facebook sign-up.";
+                errorMsg.textContent = "An error occurred during Facebook sign-up.";
                 errorMsg.style.display = "block";
             }
         });
     </script>
+
 </body>
 </html>
