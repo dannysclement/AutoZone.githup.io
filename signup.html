@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Investissement Platform Sign Up</title>
     <style>
-        /* General styling */
+        /* General Reset and Styles */
         * {
             margin: 0;
             padding: 0;
@@ -22,10 +22,10 @@
             flex-direction: column;
         }
 
-        /* Welcome message with typing and scrolling effect */
+        /* Welcome Message */
         .welcome-message-wrapper {
             width: 100%;
-            overflow: hidden; /* Hide overflowing text */
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -33,34 +33,26 @@
         }
 
         .welcome-message {
-            display: inline-block;
-            white-space: nowrap;
             font-size: 18px;
-            color: #333;
             font-weight: bold;
+            color: #333;
             animation: typing 5s steps(50) 0s 1, scrollMessage 20s linear infinite;
+            white-space: nowrap;
         }
 
         @keyframes typing {
-            0% {
-                width: 0;
-            }
-            100% {
-                width: 100%;
-            }
+            from { width: 0; }
+            to { width: 100%; }
         }
 
         @keyframes scrollMessage {
-            0% {
-                transform: translateX(100%); /* Start from right */
-            }
-            100% {
-                transform: translateX(-100%); /* End at left */
-            }
+            from { transform: translateX(100%); }
+            to { transform: translateX(-100%); }
         }
 
+        /* Form Container */
         .signup-container {
-            background-color: #ffffff;
+            background-color: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -71,13 +63,14 @@
 
         .input-field {
             margin-bottom: 15px;
+            text-align: left;
         }
 
         .input-field label {
             display: block;
             font-size: 14px;
-            margin-bottom: 5px;
             color: #555;
+            margin-bottom: 5px;
         }
 
         .input-field input {
@@ -88,35 +81,29 @@
             font-size: 16px;
         }
 
-        .signup-btn {
+        /* Buttons */
+        .signup-btn, .google-signup, .facebook-signup {
             width: 100%;
             padding: 10px;
-            border-radius: 5px;
             font-size: 16px;
+            border-radius: 5px;
             cursor: pointer;
             margin-top: 10px;
+            border: none;
+        }
+
+        .signup-btn {
             background-color: #28a745;
             color: white;
-            border: none;
         }
 
         .signup-btn:hover {
             background-color: #218838;
         }
 
-        .google-signup, .facebook-signup {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
         .google-signup {
             background-color: #db4437;
             color: white;
-            border: none;
         }
 
         .google-signup:hover {
@@ -126,25 +113,27 @@
         .facebook-signup {
             background-color: #3b5998;
             color: white;
-            border: none;
         }
 
         .facebook-signup:hover {
             background-color: #2d4373;
         }
 
+        /* Messages */
+        .error-message, .success-message {
+            display: none;
+            margin-bottom: 15px;
+        }
+
         .error-message {
             color: red;
-            margin-bottom: 15px;
-            display: none;
         }
 
         .success-message {
             color: green;
-            margin-top: 5px;
-            display: none;
         }
 
+        /* Footer */
         .footer {
             margin-top: 15px;
             text-align: center;
@@ -171,7 +160,6 @@
         <div id="errorMsg" class="error-message"></div>
         <div id="successMsg" class="success-message"></div>
 
-        <!-- Form Fields -->
         <div class="input-field">
             <label for="username">Username</label>
             <input type="text" id="username" placeholder="Enter your username">
@@ -224,25 +212,25 @@
         const phoneInput = document.getElementById('phone');
         const passwordInput = document.getElementById('password');
 
-        // Check if username, email, or phone already exist in Firestore
+        // Check if username, email, or phone already exists
         const checkIfExists = async (username, email, phone) => {
             const usersRef = collection(db, "users");
             const q1 = query(usersRef, where("username", "==", username));
             const q2 = query(usersRef, where("email", "==", email));
             const q3 = query(usersRef, where("phone", "==", `+234${phone}`));
 
-            const querySnapshot1 = await getDocs(q1);
-            const querySnapshot2 = await getDocs(q2);
-            const querySnapshot3 = await getDocs(q3);
+            const snapshot1 = await getDocs(q1);
+            const snapshot2 = await getDocs(q2);
+            const snapshot3 = await getDocs(q3);
 
             return {
-                usernameExists: querySnapshot1.size > 0,
-                emailExists: querySnapshot2.size > 0,
-                phoneExists: querySnapshot3.size > 0
+                usernameExists: snapshot1.size > 0,
+                emailExists: snapshot2.size > 0,
+                phoneExists: snapshot3.size > 0
             };
         };
 
-        // Sign up with Email and Password
+        // Sign Up with Email and Password
         document.getElementById('signupBtn').addEventListener('click', async () => {
             const username = usernameInput.value.trim();
             const email = emailInput.value.trim();
@@ -250,16 +238,15 @@
             const password = passwordInput.value.trim();
 
             if (username && email && phone && password) {
-                // Check if username, email, or phone exists
                 const { usernameExists, emailExists, phoneExists } = await checkIfExists(username, email, phone);
-                
+
                 if (usernameExists) {
                     errorMsg.textContent = "Username already exists. Please use another.";
                     errorMsg.style.display = "block";
                     return;
                 }
                 if (emailExists) {
-                    errorMsg.textContent = "This email is already associated with another account. Please try logging in or use a different email.";
+                    errorMsg.textContent = "This email is already associated with another account.";
                     errorMsg.style.display = "block";
                     return;
                 }
@@ -271,35 +258,37 @@
 
                 try {
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    await setDoc(doc(db, "users", userCredential.user.uid), {
-                        username: username,
-                        email: email,
-                        phone: `+234${phone}`,
+                    const user = userCredential.user;
+
+                    await setDoc(doc(db, "users", user.uid), {
+                        username,
+                        email,
+                        phone: `+234${phone}`
                     });
 
                     successMsg.textContent = "Account successfully created!";
                     successMsg.style.display = "block";
+
                     setTimeout(() => {
-                        window.location.href = "account.html";
+                        window.location.href = "account.html"; // Redirect to user account page
                     }, 2000);
                 } catch (error) {
-                    errorMsg.textContent = "An error occurred while creating your account.";
+                    errorMsg.textContent = "An error occurred during sign-up.";
                     errorMsg.style.display = "block";
                 }
             } else {
-                errorMsg.textContent = "Please fill all fields.";
+                errorMsg.textContent = "Please fill in all fields.";
                 errorMsg.style.display = "block";
             }
         });
 
-        // Google sign-up
+        // Google Sign Up
         document.getElementById('googleSignupBtn').addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
             try {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
-                const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.uid);
-                await setDoc(doc(db, "users", userCredential.user.uid), {
+                await setDoc(doc(db, "users", user.uid), {
                     username: user.displayName,
                     email: user.email,
                     phone: user.phoneNumber || "",
@@ -307,6 +296,7 @@
 
                 successMsg.textContent = "Account successfully created with Google!";
                 successMsg.style.display = "block";
+
                 setTimeout(() => {
                     window.location.href = "account.html";
                 }, 2000);
@@ -316,14 +306,13 @@
             }
         });
 
-        // Facebook sign-up
+        // Facebook Sign Up
         document.getElementById('facebookSignupBtn').addEventListener('click', async () => {
             const provider = new FacebookAuthProvider();
             try {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
-                const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.uid);
-                await setDoc(doc(db, "users", userCredential.user.uid), {
+                await setDoc(doc(db, "users", user.uid), {
                     username: user.displayName,
                     email: user.email,
                     phone: user.phoneNumber || "",
@@ -331,6 +320,7 @@
 
                 successMsg.textContent = "Account successfully created with Facebook!";
                 successMsg.style.display = "block";
+
                 setTimeout(() => {
                     window.location.href = "account.html";
                 }, 2000);
@@ -340,6 +330,5 @@
             }
         });
     </script>
-
 </body>
 </html>
