@@ -6,6 +6,7 @@
     <title>Investment Platform Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* Same CSS as before */
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f4f4f4;
@@ -107,8 +108,8 @@
         <div class="error-message" id="error-message"></div>
 
         <div class="input-group">
-            <label for="email">Email:</label>
-            <input type="email" id="email" placeholder="Enter your email" required>
+            <label for="login">Email/Username/Phone:</label>
+            <input type="text" id="login" placeholder="Enter email, username, or phone number" required>
         </div>
         <div class="input-group">
             <label for="password">Password:</label>
@@ -131,7 +132,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
+        import { getFirestore, doc, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -146,27 +147,63 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // Email/Password Login
+        // Helper functions
+        const isValidEmail = (input) => /\S+@\S+\.\S+/.test(input);
+        const isValidPhoneNumber = (input) => /^\d{10,15}$/.test(input);
+
+        // Function to get email by username or phone from Firestore
+        async function getEmailFromFirestore(input) {
+            try {
+                let email = null;
+
+                // Check Firestore for a user with this phone number or username
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("phone", "==", input));
+                const phoneSnapshot = await getDocs(q);
+
+                if (!phoneSnapshot.empty) {
+                    email = phoneSnapshot.docs[0].data().email; // Get the email associated with the phone
+                } else {
+                    const usernameSnapshot = await getDocs(query(usersRef, where("username", "==", input)));
+                    if (!usernameSnapshot.empty) {
+                        email = usernameSnapshot.docs[0].data().email; // Get the email associated with the username
+                    }
+                }
+
+                return email;
+            } catch (error) {
+                console.error("Error fetching email from Firestore:", error);
+                return null;
+            }
+        }
+
+        // Login handler
         document.getElementById('login-btn').addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const loginInput = document.getElementById('login').value.trim();
+            const password = document.getElementById('password').value.trim();
             const errorMessage = document.getElementById('error-message');
 
             try {
+                let email = null;
+
+                if (isValidEmail(loginInput)) {
+                    email = loginInput;
+                } else if (isValidPhoneNumber(loginInput) || loginInput) {
+                    email = await getEmailFromFirestore(loginInput);
+                }
+
+                if (!email) {
+                    throw new Error("No account found for this username or phone number.");
+                }
+
+                // Attempt to log in using email and password
                 await signInWithEmailAndPassword(auth, email, password);
                 window.location.href = 'account.html'; // Redirect to account page on success
             } catch (error) {
-                if (error.code === 'auth/user-not-found') {
-                    errorMessage.innerText = "No account found with this email. Please sign up.";
-                    setTimeout(() => window.location.href = 'signup.html', 3000); // Redirect to signup after 3 seconds
-                } else if (error.code === 'auth/wrong-password') {
-                    errorMessage.innerText = "Incorrect password. Please try again.";
-                } else {
-                    errorMessage.innerText = "Error logging in. Please try again.";
-                }
+                errorMessage.innerText = error.message || "Error logging in. Please try again.";
             }
         });
 
@@ -177,7 +214,6 @@
                 await signInWithPopup(auth, provider);
                 window.location.href = 'account.html'; // Redirect to account page on success
             } catch (error) {
-                console.log(error);
                 document.getElementById('error-message').innerText = "Google login failed. Please try again.";
             }
         });
@@ -189,7 +225,6 @@
                 await signInWithPopup(auth, provider);
                 window.location.href = 'account.html'; // Redirect to account page on success
             } catch (error) {
-                console.log(error);
                 document.getElementById('error-message').innerText = "Facebook login failed. Please try again.";
             }
         });
