@@ -4,190 +4,202 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Investment Dashboard</title>
-  <link rel="stylesheet" href="style.css">
-  <style >
-      /* General Styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+  <style>
+    /* General Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  color: #333;
-  padding: 20px;
-}
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      padding: 20px;
+    }
 
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-}
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(90deg, #4CAF50, #1E88E5);
-  color: white;
-  padding: 20px;
-  border-radius: 8px 8px 0 0;
-}
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(90deg, #4CAF50, #1E88E5);
+      color: white;
+      padding: 20px;
+      border-radius: 8px 8px 0 0;
+    }
 
-.header h1 {
-  font-size: 2rem;
-}
+    .header h1 {
+      font-size: 2rem;
+    }
 
-.logout {
-  background: red;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  text-decoration: none;
-}
+    .logout {
+      background: red;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+    }
 
-.logout:hover {
-  background: darkred;
-}
+    .logout:hover {
+      background: darkred;
+    }
 
-.balance {
-  text-align: center;
-  margin: 20px 0;
-}
+    .balance {
+      text-align: center;
+      margin: 20px 0;
+    }
 
-.balance h2 {
-  font-size: 1.5rem;
-}
+    .balance h2 {
+      font-size: 1.5rem;
+    }
 
-.balance p {
-  font-size: 2rem;
-  color: #4CAF50;
-  font-weight: bold;
-}
+    .balance p {
+      font-size: 2rem;
+      color: #4CAF50;
+      font-weight: bold;
+    }
 
-.actions {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 20px;
-}
+    .actions {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
 
-.actions button {
-  background: #1E88E5;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-}
+    .actions button {
+      background: #1E88E5;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-.actions button:hover {
-  background: #1565C0;
-}
+    .actions button:hover {
+      background: #1565C0;
+    }
 
-.market-ticker {
-  margin: 20px 0;
-  background: #f7fbfc;
-  padding: 10px;
-  border-left: 5px solid #4CAF50;
-  font-style: italic;
-  white-space: nowrap;
-  overflow: hidden;
-  position: relative;
-}
+    .market-ticker {
+      margin: 20px 0;
+      background: #f7fbfc;
+      padding: 10px;
+      border-left: 5px solid #4CAF50;
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      position: relative;
+    }
 
-.market-ticker p {
-  animation: ticker 15s linear infinite;
-}
+    .market-ticker p {
+      animation: ticker 15s linear infinite;
+    }
 
-@keyframes ticker {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(-100%);
-  }
-}
+    @keyframes ticker {
+      from {
+        transform: translateX(100%);
+      }
+      to {
+        transform: translateX(-100%);
+      }
+    }
 
-.investment-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
+    .investment-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
 
-.investment {
-  background: #f9f9f9;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  text-align: center;
-}
+    .investment {
+      background: #f9f9f9;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      text-align: center;
+    }
 
-.investment h3 {
-  margin-bottom: 10px;
-}
+    .investment h3 {
+      margin-bottom: 10px;
+    }
 
-.investment p {
-  margin-bottom: 15px;
-  font-size: 0.9rem;
-}
+    .investment p {
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
 
-.investment button {
-  background: #4CAF50;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-}
+    .investment button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-.investment button:hover {
-  background: #388E3C;
-}
-
+    .investment button:hover {
+      background: #388E3C;
+    }
   </style>
-  <script type="module" src="script.js" defer></script>
-  <script >
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+  <script type="module">
+    // Import Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-// Firebase Configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
-  authDomain: "techzone-c96c0.firebaseapp.com",
-  databaseURL: "https://techzone-c96c0-default-rtdb.firebaseio.com/",
-  projectId: "techzone-c96c0",
-  storageBucket: "techzone-c96c0.appspot.com",
-  messagingSenderId: "399698120752",
-  appId: "1:399698120752:web:40821d2140cd0d860a1df5",
-};
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
+      authDomain: "techzone-c96c0.firebaseapp.com",
+      projectId: "techzone-c96c0",
+      storageBucket: "techzone-c96c0.appspot.com",
+      messagingSenderId: "399698120752",
+      appId: "1:399698120752:web:40821d2140cd0d860a1df5",
+    };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const database = getDatabase(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-// Redirect to login.html if the user is not logged in
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // Fetch user balance
-    const balanceRef = ref(database, `users/${user.uid}/balance`);
-    onValue(balanceRef, (snapshot) => {
-      const balance = snapshot.val() || 0;
-      document.getElementById("userBalance").innerText = `₦${balance.toFixed(2)}`;
+    // Handle User Authentication
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Fetch user balance from Firestore
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          const balance = userDoc.data().balance || 0;
+          document.getElementById("userBalance").innerText = `₦${balance.toFixed(2)}`;
+        } else {
+          console.log("No such document!");
+        }
+      } else {
+        alert("You must log in to access this page.");
+        window.location.href = "login.html";
+      }
     });
-  } else {
-    alert("You must log in to access this page.");
-    window.location.href = "login.html";
-  }
-});
 
+    // Function to handle sign up balance
+    async function setUserBalance(user, initialBalance) {
+      const userDocRef = doc(db, "users", user.uid);
+      await setDoc(userDocRef, {
+        balance: initialBalance
+      });
+    }
+
+    // Call this function when a new user signs up with an initial balance
+    // For example, after a successful registration, call `setUserBalance(user, 1000);`
   </script>
 </head>
 <body>
