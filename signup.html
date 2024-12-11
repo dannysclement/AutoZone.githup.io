@@ -246,7 +246,7 @@
                     return;
                 }
                 if (emailExists) {
-                    errorMsg.textContent = "Email address already exists. Please use another.";
+                    errorMsg.textContent = "We found out that this email address already exists. Please login or use another one.";
                     errorMsg.style.display = "block";
                     return;
                 }
@@ -288,7 +288,6 @@
             try {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
-
                 await setDoc(doc(db, "users", user.uid), {
                     username: user.displayName,
                     email: user.email,
@@ -313,7 +312,6 @@
             try {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
-
                 await setDoc(doc(db, "users", user.uid), {
                     username: user.displayName,
                     email: user.email,
