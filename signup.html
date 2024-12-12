@@ -1,334 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investissement Platform Sign Up</title>
-    <style>
-        /* General Reset and Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investment Dashboard</title>
+  <style>
+    /* General Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-        }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      padding: 20px;
+    }
 
-        /* Welcome Message */
-        .welcome-message-wrapper {
-            width: 100%;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 40px;
-        }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
 
-        .welcome-message {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            animation: typing 5s steps(50) 0s 1, scrollMessage 20s linear infinite;
-            white-space: nowrap;
-        }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(90deg, #4CAF50, #1E88E5);
+      color: white;
+      padding: 20px;
+      border-radius: 8px 8px 0 0;
+    }
 
-        @keyframes typing {
-            from { width: 0; }
-            to { width: 100%; }
-        }
+    .header h1 {
+      font-size: 2rem;
+    }
 
-        @keyframes scrollMessage {
-            from { transform: translateX(100%); }
-            to { transform: translateX(-100%); }
-        }
+    .logout {
+      background: red;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+    }
 
-        /* Form Container */
-        .signup-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-        }
+    .logout:hover {
+      background: darkred;
+    }
 
-        .input-field {
-            margin-bottom: 15px;
-            text-align: left;
-        }
+    .balance {
+      text-align: center;
+      margin: 20px 0;
+    }
 
-        .input-field label {
-            display: block;
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 5px;
-        }
+    .balance h2 {
+      font-size: 1.5rem;
+    }
 
-        .input-field input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
+    .balance p {
+      font-size: 2rem;
+      color: #4CAF50;
+      font-weight: bold;
+    }
 
-        /* Buttons */
-        .signup-btn, .google-signup, .facebook-signup {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-            border: none;
-        }
+    .actions {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
 
-        .signup-btn {
-            background-color: #28a745;
-            color: white;
-        }
+    .actions button {
+      background: #1E88E5;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-        .signup-btn:hover {
-            background-color: #218838;
-        }
+    .actions button:hover {
+      background: #1565C0;
+    }
 
-        .google-signup {
-            background-color: #db4437;
-            color: white;
-        }
+    .market-ticker {
+      margin: 20px 0;
+      background: #f7fbfc;
+      padding: 10px;
+      border-left: 5px solid #4CAF50;
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      position: relative;
+    }
 
-        .google-signup:hover {
-            background-color: #c33729;
-        }
+    .market-ticker p {
+      animation: ticker 15s linear infinite;
+    }
 
-        .facebook-signup {
-            background-color: #3b5998;
-            color: white;
-        }
+    @keyframes ticker {
+      from {
+        transform: translateX(100%);
+      }
+      to {
+        transform: translateX(-100%);
+      }
+    }
 
-        .facebook-signup:hover {
-            background-color: #2d4373;
-        }
+    .investment-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
 
-        /* Messages */
-        .error-message, .success-message {
-            display: none;
-            margin-bottom: 15px;
-        }
+    .investment {
+      background: #f9f9f9;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      text-align: center;
+    }
 
-        .error-message {
-            color: red;
-        }
+    .investment h3 {
+      margin-bottom: 10px;
+    }
 
-        .success-message {
-            color: green;
-        }
+    .investment p {
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
 
-        /* Footer */
-        .footer {
-            margin-top: 15px;
-            text-align: center;
-        }
+    .investment button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-        .footer a {
-            color: #007bff;
-            text-decoration: none;
+    .investment button:hover {
+      background: #388E3C;
+    }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
+      authDomain: "techzone-c96c0.firebaseapp.com",
+      projectId: "techzone-c96c0",
+      storageBucket: "techzone-c96c0.appspot.com",
+      messagingSenderId: "399698120752",
+      appId: "1:399698120752:web:40821d2140cd0d860a1df5",
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Real-time balance listener
+    const setUpRealTimeBalanceListener = (userId) => {
+      const userDoc = doc(db, "users", userId);
+
+      onSnapshot(userDoc, (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const { balance } = docSnapshot.data();
+          document.getElementById("userBalance").innerText = `₦${balance.toFixed(2)}`;
+        } else {
+          // Initialize balance to 0 if document does not exist
+          setDoc(userDoc, { balance: 0 });
+          document.getElementById("userBalance").innerText = "₦0.00";
         }
-    </style>
+      });
+    };
+
+    // Log out the user
+    const logOut = async () => {
+      try {
+        await signOut(auth);
+        alert("Logged out successfully!");
+        window.location.href = "login.html";
+      } catch (error) {
+        console.error("Error logging out:", error.message);
+      }
+    };
+
+    // Monitor authentication state
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Set up real-time listener for balance updates
+        setUpRealTimeBalanceListener(user.uid);
+      } else {
+        alert("You must log in to access this page.");
+        window.location.href = "login.html";
+      }
+    });
+
+    // Attach event listeners for logout
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("logoutButton").addEventListener("click", logOut);
+    });
+  </script>
 </head>
 <body>
-
-    <!-- Welcome Message -->
-    <div class="welcome-message-wrapper">
-        <div class="welcome-message">
-            You are welcome! By using our platform, you will get discount rates when you invest with us. Thanks again! Our platform is easy to use, secure, and offers a great return on investment. Join us today and start earning.
-        </div>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Investment Dashboard</h1>
+      <button id="logoutButton" class="logout">Logout</button>
     </div>
 
-    <!-- Signup Form -->
-    <div class="signup-container">
-        <h2>Sign Up</h2>
-        <div id="errorMsg" class="error-message"></div>
-        <div id="successMsg" class="success-message"></div>
+    <!-- Main Dashboard -->
+    <div id="dashboard">
+      <!-- Balance Display -->
+      <div class="balance">
+        <h2>Current Balance:</h2>
+        <p id="userBalance">₦0.00</p>
+      </div>
 
-        <div class="input-field">
-            <label for="username">Username</label>
-            <input type="text" id="username" placeholder="Enter your username">
-        </div>
-        <div class="input-field">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Enter your email">
-        </div>
-        <div class="input-field">
-            <label for="phone">Phone Number (+234)</label>
-            <input type="text" id="phone" placeholder="Enter your phone number">
-        </div>
-        <div class="input-field">
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Enter your password">
-        </div>
+      <!-- Action Buttons -->
+      <div class="actions">
+        <a href="add-fund.html"><button>Add Fund</button></a>
+        <a href="withdraw.html"><button>Withdraw</button></a>
+        <a href="investment.html"><button>Invest</button></a>
+      </div>
 
-        <button class="signup-btn" id="signupBtn">Sign Up</button>
-        <button class="google-signup" id="googleSignupBtn">Sign Up with Google</button>
-        <button class="facebook-signup" id="facebookSignupBtn">Sign Up with Facebook</button>
+      <!-- Scrolling Market News -->
+      <div class="market-ticker">
+        <p>Market News: Tech stocks up 3%, Crypto soaring, Real Estate steady.</p>
+      </div>
 
-        <div class="footer">
-            <p>Already have an account? <a href="login.html">Login</a></p>
+      <!-- Investment List -->
+      <div class="investment-list">
+        <div class="investment">
+          <h3>Green Energy Growth Fund</h3>
+          <p>Returns: 12% annually</p>
+          <a href="green.html"><button>Invest</button></a>
         </div>
+        <div class="investment">
+          <h3>Tech Innovation Fund</h3>
+          <p>Returns: 15% annually</p>
+          <a href="tech.html"><button>Invest</button></a>
+        </div>
+        <div class="investment">
+          <h3>Global Real Estate Fund</h3>
+          <p>Returns: 8% annually</p>
+          <a href="global.html"><button>Invest</button></a>
+        </div>
+        <div class="investment">
+          <h3>Crypto Growth Portfolio</h3>
+          <p>Returns: 20% annually</p>
+          <a href="crypto.html"><button>Invest</button></a>
+        </div>
+      </div>
     </div>
-
-    <!-- Firebase Integration -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
-            authDomain: "techzone-c96c0.firebaseapp.com",
-            projectId: "techzone-c96c0",
-            storageBucket: "techzone-c96c0.firebasestorage.app",
-            messagingSenderId: "399698120752",
-            appId: "1:399698120752:web:40821d2140cd0d860a1df5"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        const errorMsg = document.getElementById('errorMsg');
-        const successMsg = document.getElementById('successMsg');
-        const usernameInput = document.getElementById('username');
-        const emailInput = document.getElementById('email');
-        const phoneInput = document.getElementById('phone');
-        const passwordInput = document.getElementById('password');
-
-        // Check if username, email, or phone already exists
-        const checkIfExists = async (username, email, phone) => {
-            const usersRef = collection(db, "users");
-            const q1 = query(usersRef, where("username", "==", username));
-            const q2 = query(usersRef, where("email", "==", email));
-            const q3 = query(usersRef, where("phone", "==", `+234${phone}`));
-
-            const snapshot1 = await getDocs(q1);
-            const snapshot2 = await getDocs(q2);
-            const snapshot3 = await getDocs(q3);
-
-            return {
-                usernameExists: snapshot1.size > 0,
-                emailExists: snapshot2.size > 0,
-                phoneExists: snapshot3.size > 0
-            };
-        };
-
-        // Sign Up with Email and Password
-        document.getElementById('signupBtn').addEventListener('click', async () => {
-            const username = usernameInput.value.trim();
-            const email = emailInput.value.trim();
-            const phone = phoneInput.value.trim();
-            const password = passwordInput.value.trim();
-
-            if (username && email && phone && password) {
-                const { usernameExists, emailExists, phoneExists } = await checkIfExists(username, email, phone);
-
-                if (usernameExists) {
-                    errorMsg.textContent = "Username already exists. Please use another.";
-                    errorMsg.style.display = "block";
-                    return;
-                }
-                if (emailExists) {
-                    errorMsg.textContent = "We found out that this email address already exists. Please login or use another one.";
-                    errorMsg.style.display = "block";
-                    return;
-                }
-                if (phoneExists) {
-                    errorMsg.textContent = "Phone number already exists. Please use another.";
-                    errorMsg.style.display = "block";
-                    return;
-                }
-
-                try {
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    const user = userCredential.user;
-
-                    await setDoc(doc(db, "users", user.uid), {
-                        username,
-                        email,
-                        phone: `+234${phone}`
-                    });
-
-                    successMsg.textContent = "Account successfully created!";
-                    successMsg.style.display = "block";
-
-                    setTimeout(() => {
-                        window.location.href = "account.html"; // Redirect to user account page
-                    }, 2000);
-                } catch (error) {
-                    errorMsg.textContent = "An error occurred during sign-up.";
-                    errorMsg.style.display = "block";
-                }
-            } else {
-                errorMsg.textContent = "Please fill in all fields.";
-                errorMsg.style.display = "block";
-            }
-        });
-
-        // Google Sign Up
-        document.getElementById('googleSignupBtn').addEventListener('click', async () => {
-            const provider = new GoogleAuthProvider();
-            try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-                await setDoc(doc(db, "users", user.uid), {
-                    username: user.displayName,
-                    email: user.email,
-                    phone: user.phoneNumber || "",
-                });
-
-                successMsg.textContent = "Account successfully created with Google!";
-                successMsg.style.display = "block";
-
-                setTimeout(() => {
-                    window.location.href = "account.html";
-                }, 2000);
-            } catch (error) {
-                errorMsg.textContent = "An error occurred during Google sign-up.";
-                errorMsg.style.display = "block";
-            }
-        });
-
-        // Facebook Sign Up
-        document.getElementById('facebookSignupBtn').addEventListener('click', async () => {
-            const provider = new FacebookAuthProvider();
-            try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-                await setDoc(doc(db, "users", user.uid), {
-                    username: user.displayName,
-                    email: user.email,
-                    phone: user.phoneNumber || "",
-                });
-
-                successMsg.textContent = "Account successfully created with Facebook!";
-                successMsg.style.display = "block";
-
-                setTimeout(() => {
-                    window.location.href = "account.html";
-                }, 2000);
-            } catch (error) {
-                errorMsg.textContent = "An error occurred during Facebook sign-up.";
-                errorMsg.style.display = "block";
-            }
-        });
-    </script>
+  </div>
 </body>
 </html>
