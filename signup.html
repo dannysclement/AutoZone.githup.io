@@ -154,7 +154,7 @@
 <body>
     <!-- Moving Welcome Message -->
     <div class="welcome-message">
-        <span>Welcome! Sign up now to use our platform and start investing!</span>
+        Welcome! Sign up now to use our platform and start investing!
     </div>
 
     <div class="container">
@@ -191,54 +191,54 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        // Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
+        // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
-            authDomain: "techzone-c96c0.firebaseapp.com",
-            projectId: "techzone-c96c0",
-            storageBucket: "techzone-c96c0.firebasestorage.app",
-            messagingSenderId: "399698120752",
-            appId: "1:399698120752:web:40821d2140cd0d860a1df5",
-            measurementId: "G-Z7VFYH20LH"
+            apiKey: "AIzaSyBsQLHmUZUfmciuTIDWz4ezOZ3QTpyjg5M",
+            authDomain: "invest-ad9f0.firebaseapp.com",
+            projectId: "invest-ad9f0",
+            storageBucket: "invest-ad9f0.firebasestorage.app",
+            messagingSenderId: "539673203809",
+            appId: "1:539673203809:web:ce4f05dc9a1a2a96174620",
+            measurementId: "G-7WY9BZYZSM"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Helper function to check if value exists in Firestore
+        // Helper function to check Firestore for existing values
         async function checkIfExists(field, value) {
-            const usersRef = collection(db, "users");
-            const q = query(usersRef, where(field, "==", value));
+            const q = query(collection(db, "users"), where(field, "==", value));
             const snapshot = await getDocs(q);
-            return snapshot.empty ? false : true;
+            return !snapshot.empty;
         }
 
-        // Phone number validation
+        // Validate phone number
         function validatePhoneNumber(phone) {
-            const phoneRegex = /^0\d{10}$/;
-            return phoneRegex.test(phone);
+            const regex = /^0\d{10}$/;
+            return regex.test(phone);
         }
 
-        // Sign-up button click event
-        document.getElementById('signup-btn').addEventListener('click', async () => {
-            const email = document.getElementById('email').value.trim();
-            const username = document.getElementById('username').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const errorMessage = document.getElementById('error-message');
+        // Handle sign-up
+        document.getElementById("signup-btn").addEventListener("click", async () => {
+            const email = document.getElementById("email").value;
+            const username = document.getElementById("username").value;
+            const phone = document.getElementById("phone").value;
+            const password = document.getElementById("password").value;
+            const errorMessage = document.getElementById("error-message");
 
-            // Validate phone number
             if (!validatePhoneNumber(phone)) {
-                errorMessage.innerText = "Phone number must start with 0 and be exactly 11 digits.";
+                errorMessage.innerText = "Phone number must start with 0 and be 11 digits.";
                 return;
             }
 
             try {
-                // Check if email, username, or phone already exists
                 if (await checkIfExists("email", email)) {
                     throw new Error("Email is already in use.");
                 }
@@ -249,33 +249,31 @@
                     throw new Error("Phone number is already in use.");
                 }
 
-                // Create a new user with email and password
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Add user details to Firestore
                 await addDoc(collection(db, "users"), {
                     uid: user.uid,
-                    email: email,
-                    username: username,
-                    phone: phone
+                    email,
+                    username,
+                    phone
                 });
 
-                window.location.href = 'account.html'; // Redirect to account page on success
+                window.location.href = "account.html";
             } catch (error) {
-                errorMessage.innerText = error.message || "Error creating account. Please try again.";
+                errorMessage.innerText = error.message;
             }
         });
 
-        // Google Sign-Up
-        document.getElementById('google-signup').addEventListener('click', async () => {
+        // Google sign-up
+        document.getElementById("google-signup").addEventListener("click", async () => {
             const provider = new GoogleAuthProvider();
             try {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
 
                 if (await checkIfExists("email", user.email)) {
-                    throw new Error("Google account email is already registered.");
+                    throw new Error("Email already registered via Google.");
                 }
 
                 await addDoc(collection(db, "users"), {
@@ -284,21 +282,22 @@
                     username: user.displayName || "Google User",
                     phone: user.phoneNumber || ""
                 });
-                window.location.href = 'account.html';
+
+                window.location.href = "account.html";
             } catch (error) {
-                document.getElementById('error-message').innerText = "Google sign-up failed. Please try again.";
+                document.getElementById("error-message").innerText = error.message;
             }
         });
 
-        // Facebook Sign-Up
-        document.getElementById('facebook-signup').addEventListener('click', async () => {
+        // Facebook sign-up
+        document.getElementById("facebook-signup").addEventListener("click", async () => {
             const provider = new FacebookAuthProvider();
             try {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
 
                 if (await checkIfExists("email", user.email)) {
-                    throw new Error("Facebook account email is already registered.");
+                    throw new Error("Email already registered via Facebook.");
                 }
 
                 await addDoc(collection(db, "users"), {
@@ -307,9 +306,10 @@
                     username: user.displayName || "Facebook User",
                     phone: user.phoneNumber || ""
                 });
-                window.location.href = 'account.html';
+
+                window.location.href = "account.html";
             } catch (error) {
-                document.getElementById('error-message').innerText = "Facebook sign-up failed. Please try again.";
+                document.getElementById("error-message").innerText = error.message;
             }
         });
     </script>
