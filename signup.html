@@ -1,271 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Investment Dashboard</title>
-  <style>
-    /* General Styles */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: linear-gradient(90deg, #4CAF50, #1E88E5);
-      color: white;
-      padding: 20px;
-      border-radius: 8px 8px 0 0;
-    }
-
-    .header h1 {
-      font-size: 2rem;
-    }
-
-    .logout {
-      background: red;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      text-decoration: none;
-    }
-
-    .logout:hover {
-      background: darkred;
-    }
-
-    .balance {
-      text-align: center;
-      margin: 20px 0;
-    }
-
-    .balance h2 {
-      font-size: 1.5rem;
-    }
-
-    .balance p {
-      font-size: 2rem;
-      color: #4CAF50;
-      font-weight: bold;
-    }
-
-    .actions {
-      display: flex;
-      justify-content: space-around;
-      margin-bottom: 20px;
-    }
-
-    .actions button {
-      background: #1E88E5;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .actions button:hover {
-      background: #1565C0;
-    }
-
-    .market-ticker {
-      margin: 20px 0;
-      background: #f7fbfc;
-      padding: 10px;
-      border-left: 5px solid #4CAF50;
-      font-style: italic;
-      white-space: nowrap;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .market-ticker p {
-      animation: ticker 15s linear infinite;
-    }
-
-    @keyframes ticker {
-      from {
-        transform: translateX(100%);
-      }
-      to {
-        transform: translateX(-100%);
-      }
-    }
-
-    .investment-list {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-    }
-
-    .investment {
-      background: #f9f9f9;
-      padding: 20px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      text-align: center;
-    }
-
-    .investment h3 {
-      margin-bottom: 10px;
-    }
-
-    .investment p {
-      margin-bottom: 15px;
-      font-size: 0.9rem;
-    }
-
-    .investment button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .investment button:hover {
-      background: #388E3C;
-    }
-  </style>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-
-    // Firebase Configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
-      authDomain: "techzone-c96c0.firebaseapp.com",
-      projectId: "techzone-c96c0",
-      storageBucket: "techzone-c96c0.appspot.com",
-      messagingSenderId: "399698120752",
-      appId: "1:399698120752:web:40821d2140cd0d860a1df5",
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // Real-time balance listener
-    const setUpRealTimeBalanceListener = (userId) => {
-      const userDoc = doc(db, "users", userId);
-
-      onSnapshot(userDoc, (docSnapshot) => {
-        if (docSnapshot.exists()) {
-          const { balance } = docSnapshot.data();
-          document.getElementById("userBalance").innerText = `₦${balance.toFixed(2)}`;
-        } else {
-          // Initialize balance to 0 if document does not exist
-          setDoc(userDoc, { balance: 0 });
-          document.getElementById("userBalance").innerText = "₦0.00";
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Platform Sign Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-      });
-    };
-
-    // Log out the user
-    const logOut = async () => {
-      try {
-        await signOut(auth);
-        alert("Logged out successfully!");
-        window.location.href = "login.html";
-      } catch (error) {
-        console.error("Error logging out:", error.message);
-      }
-    };
-
-    // Monitor authentication state
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Set up real-time listener for balance updates
-        setUpRealTimeBalanceListener(user.uid);
-      } else {
-        alert("You must log in to access this page.");
-        window.location.href = "login.html";
-      }
-    });
-
-    // Attach event listeners for logout
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("logoutButton").addEventListener("click", logOut);
-    });
-  </script>
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 400px;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .footer {
+            margin-top: 20px;
+        }
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .social-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .social-button {
+            width: 48%;
+            padding: 10px;
+            font-size: 16px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .google-btn {
+            background-color: #db4437;
+        }
+        .google-btn:hover {
+            background-color: #c5382f;
+        }
+        .facebook-btn {
+            background-color: #4267b2;
+        }
+        .facebook-btn:hover {
+            background-color: #365899;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <h1>Investment Dashboard</h1>
-      <button id="logoutButton" class="logout">Logout</button>
+    <div class="container">
+        <h2>Create Your Account</h2>
+        <div class="error-message" id="error-message"></div>
+
+        <div class="input-group">
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" placeholder="Enter your email address" required>
+        </div>
+        <div class="input-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" placeholder="Enter your username" required>
+        </div>
+        <div class="input-group">
+            <label for="phone">Phone Number:</label>
+            <input type="text" id="phone" placeholder="Enter your phone number" required>
+        </div>
+        <div class="input-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Create your password" required>
+        </div>
+
+        <button class="button" id="signup-btn">Sign Up</button>
+
+        <div class="social-buttons">
+            <button class="social-button google-btn" id="google-signup">Sign up with Google</button>
+            <button class="social-button facebook-btn" id="facebook-signup">Sign up with Facebook</button>
+        </div>
+
+        <div class="footer">
+            <p>Already have an account? <a href="login.html">Log in</a></p>
+        </div>
     </div>
 
-    <!-- Main Dashboard -->
-    <div id="dashboard">
-      <!-- Balance Display -->
-      <div class="balance">
-        <h2>Current Balance:</h2>
-        <p id="userBalance">₦0.00</p>
-      </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-      <!-- Action Buttons -->
-      <div class="actions">
-        <a href="add-fund.html"><button>Add Fund</button></a>
-        <a href="withdraw.html"><button>Withdraw</button></a>
-        <a href="investment.html"><button>Invest</button></a>
-      </div>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
+            authDomain: "techzone-c96c0.firebaseapp.com",
+            projectId: "techzone-c96c0",
+            storageBucket: "techzone-c96c0.firebasestorage.app",
+            messagingSenderId: "399698120752",
+            appId: "1:399698120752:web:40821d2140cd0d860a1df5",
+            measurementId: "G-Z7VFYH20LH"
+        };
 
-      <!-- Scrolling Market News -->
-      <div class="market-ticker">
-        <p>Market News: Tech stocks up 3%, Crypto soaring, Real Estate steady.</p>
-      </div>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-      <!-- Investment List -->
-      <div class="investment-list">
-        <div class="investment">
-          <h3>Green Energy Growth Fund</h3>
-          <p>Returns: 12% annually</p>
-          <a href="green.html"><button>Invest</button></a>
-        </div>
-        <div class="investment">
-          <h3>Tech Innovation Fund</h3>
-          <p>Returns: 15% annually</p>
-          <a href="tech.html"><button>Invest</button></a>
-        </div>
-        <div class="investment">
-          <h3>Global Real Estate Fund</h3>
-          <p>Returns: 8% annually</p>
-          <a href="global.html"><button>Invest</button></a>
-        </div>
-        <div class="investment">
-          <h3>Crypto Growth Portfolio</h3>
-          <p>Returns: 20% annually</p>
-          <a href="crypto.html"><button>Invest</button></a>
-        </div>
-      </div>
-    </div>
-  </div>
+        async function checkIfUserExists(field, value) {
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, where(field, "==", value));
+            const snapshot = await getDocs(q);
+            return !snapshot.empty;
+        }
+
+        function displayError(message) {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = message;
+        }
+
+        document.getElementById('signup-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!email || !username || !phone || !password) {
+                return displayError("Please fill all fields.");
+            }
+
+            // Check if user data exists in Firestore in real-time
+            if (await checkIfUserExists("email", email)) {
+                return displayError("Email is already in use.");
+            }
+            if (await checkIfUserExists("username", username)) {
+                return displayError("Username is already taken.");
+            }
+            if (await checkIfUserExists("phone", phone)) {
+                return displayError("Phone number is already in use.");
+            }
+
+            try {
+                // Create user with email and password
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Store user data in Firestore immediately
+                await setDoc(doc(db, "users", user.uid), {
+                    email: email,
+                    username: username,
+                    phone: phone,
+                    createdAt: new Date().toISOString(),
+                });
+
+                // Redirect user after successful sign up
+                window.location.href = "account.html";
+            } catch (error) {
+                displayError(error.message || "Error during sign-up. Please try again.");
+            }
+        });
+
+        // Google Sign-Up
+        document.getElementById('google-signup').addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                // Save user info to Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    email: user.email,
+                    username: user.displayName || "Google User",
+                    phone: user.phoneNumber || "",
+                    createdAt: new Date().toISOString(),
+                });
+
+                window.location.href = "account.html";
+            } catch (error) {
+                displayError("Google sign-up failed. Please try again.");
+            }
+        });
+
+        // Facebook Sign-Up
+        document.getElementById('facebook-signup').addEventListener('click', async () => {
+            const provider = new FacebookAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                // Save user info to Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    email: user.email,
+                    username: user.displayName || "Facebook User",
+                    phone: user.phoneNumber || "",
+                    createdAt: new Date().toISOString(),
+                });
+
+                window.location.href = "account.html";
+            } catch (error) {
+                displayError("Facebook sign-up failed. Please try again.");
+            }
+        });
+    </script>
 </body>
 </html>
