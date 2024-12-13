@@ -6,7 +6,6 @@
     <title>Investment Platform Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Same CSS as before */
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f4f4f4;
@@ -130,19 +129,19 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
-            authDomain: "techzone-c96c0.firebaseapp.com",
-            projectId: "techzone-c96c0",
-            storageBucket: "techzone-c96c0.firebasestorage.app",
-            messagingSenderId: "399698120752",
-            appId: "1:399698120752:web:40821d2140cd0d860a1df5",
-            measurementId: "G-Z7VFYH20LH"
+            apiKey: "AIzaSyBsQLHmUZUfmciuTIDWz4ezOZ3QTpyjg5M",
+            authDomain: "invest-ad9f0.firebaseapp.com",
+            projectId: "invest-ad9f0",
+            storageBucket: "invest-ad9f0.firebasestorage.app",
+            messagingSenderId: "539673203809",
+            appId: "1:539673203809:web:ce4f05dc9a1a2a96174620",
+            measurementId: "G-7WY9BZYZSM"
         };
 
         // Initialize Firebase
@@ -150,37 +149,26 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Helper functions
         const isValidEmail = (input) => /\S+@\S+\.\S+/.test(input);
         const isValidPhoneNumber = (input) => /^\d{10,15}$/.test(input);
 
-        // Function to get email by username or phone from Firestore
         async function getEmailFromFirestore(input) {
-            try {
-                let email = null;
+            const usersRef = collection(db, "users");
+            let email = null;
 
-                // Check Firestore for a user with this phone number or username
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, where("phone", "==", input));
-                const phoneSnapshot = await getDocs(q);
-
-                if (!phoneSnapshot.empty) {
-                    email = phoneSnapshot.docs[0].data().email; // Get the email associated with the phone
-                } else {
-                    const usernameSnapshot = await getDocs(query(usersRef, where("username", "==", input)));
-                    if (!usernameSnapshot.empty) {
-                        email = usernameSnapshot.docs[0].data().email; // Get the email associated with the username
-                    }
+            const phoneSnapshot = await getDocs(query(usersRef, where("phone", "==", input)));
+            if (!phoneSnapshot.empty) {
+                email = phoneSnapshot.docs[0].data().email;
+            } else {
+                const usernameSnapshot = await getDocs(query(usersRef, where("username", "==", input)));
+                if (!usernameSnapshot.empty) {
+                    email = usernameSnapshot.docs[0].data().email;
                 }
-
-                return email;
-            } catch (error) {
-                console.error("Error fetching email from Firestore:", error);
-                return null;
             }
+
+            return email;
         }
 
-        // Login handler
         document.getElementById('login-btn').addEventListener('click', async () => {
             const loginInput = document.getElementById('login').value.trim();
             const password = document.getElementById('password').value.trim();
@@ -195,35 +183,30 @@
                     email = await getEmailFromFirestore(loginInput);
                 }
 
-                if (!email) {
-                    throw new Error("No account found for this username or phone number.");
-                }
+                if (!email) throw new Error("No account found for this username or phone number.");
 
-                // Attempt to log in using email and password
                 await signInWithEmailAndPassword(auth, email, password);
-                window.location.href = 'account.html'; // Redirect to account page on success
+                window.location.href = 'account.html';
             } catch (error) {
                 errorMessage.innerText = error.message || "Error logging in. Please try again.";
             }
         });
 
-        // Google Sign-In
         document.getElementById('google-signin').addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
             try {
                 await signInWithPopup(auth, provider);
-                window.location.href = 'account.html'; // Redirect to account page on success
+                window.location.href = 'account.html';
             } catch (error) {
                 document.getElementById('error-message').innerText = "Google login failed. Please try again.";
             }
         });
 
-        // Facebook Sign-In
         document.getElementById('facebook-signin').addEventListener('click', async () => {
             const provider = new FacebookAuthProvider();
             try {
                 await signInWithPopup(auth, provider);
-                window.location.href = 'account.html'; // Redirect to account page on success
+                window.location.href = 'account.html';
             } catch (error) {
                 document.getElementById('error-message').innerText = "Facebook login failed. Please try again.";
             }
