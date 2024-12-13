@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Investment Platform Sign Up</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* Global styles */
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f4f4f4;
@@ -15,7 +16,9 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
         }
+
         .container {
             background-color: #ffffff;
             border-radius: 8px;
@@ -23,20 +26,26 @@
             padding: 20px;
             width: 400px;
             text-align: center;
+            position: relative;
+            z-index: 10;
         }
+
         h2 {
             color: #333;
             margin-bottom: 20px;
         }
+
         .input-group {
             margin-bottom: 15px;
             text-align: left;
         }
+
         .input-group label {
             display: block;
             margin-bottom: 5px;
             color: #555;
         }
+
         .input-group input {
             width: 100%;
             padding: 10px;
@@ -44,6 +53,7 @@
             border-radius: 5px;
             font-size: 16px;
         }
+
         .button {
             width: 100%;
             padding: 10px;
@@ -55,24 +65,30 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         .button:hover {
             background-color: #0056b3;
         }
+
         .footer {
             margin-top: 20px;
         }
+
         .footer a {
             color: #007bff;
             text-decoration: none;
         }
+
         .footer a:hover {
             text-decoration: underline;
         }
+
         .social-buttons {
             display: flex;
             justify-content: space-between;
             margin-bottom: 15px;
         }
+
         .social-button {
             width: 48%;
             padding: 10px;
@@ -83,25 +99,64 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         .google-btn {
             background-color: #db4437;
         }
+
         .google-btn:hover {
             background-color: #c5382f;
         }
+
         .facebook-btn {
             background-color: #4267b2;
         }
+
         .facebook-btn:hover {
             background-color: #365899;
         }
+
         .error-message {
             color: red;
             margin-top: 10px;
         }
+
+        /* Moving message styles */
+        .welcome-message {
+            position: fixed;
+            top: 0;
+            left: 100%;
+            background-color: #007bff;
+            color: white;
+            font-size: 20px;
+            padding: 10px 20px;
+            border-radius: 0 0 10px 10px;
+            white-space: nowrap;
+            animation: moveMessage 10s linear infinite;
+            z-index: 20;
+        }
+
+        @keyframes moveMessage {
+            0% {
+                left: 100%;
+            }
+            100% {
+                left: -100%;
+            }
+        }
+
+        /* Prevent zooming on mobile */
+        html, body {
+            touch-action: manipulation;
+        }
     </style>
 </head>
 <body>
+    <!-- Moving Welcome Message -->
+    <div class="welcome-message">
+        <span>Welcome! Sign up now to use our platform and start investing!</span>
+    </div>
+
     <div class="container">
         <h2>Create Your Account</h2>
         <div class="error-message" id="error-message"></div>
@@ -115,8 +170,8 @@
             <input type="text" id="username" placeholder="Enter your username" required>
         </div>
         <div class="input-group">
-            <label for="phone">Phone Number:</label>
-            <input type="text" id="phone" placeholder="Enter your phone number" required>
+            <label for="phone">Phone Number (11 digits, starts with 0):</label>
+            <input type="text" id="phone" placeholder="Enter your phone number" required maxlength="11">
         </div>
         <div class="input-group">
             <label for="password">Password:</label>
@@ -138,9 +193,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-        import { getFirestore, collection, query, where, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
             authDomain: "techzone-c96c0.firebaseapp.com",
@@ -155,56 +209,61 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        async function checkIfUserExists(field, value) {
+        // Helper function to check if value exists in Firestore
+        async function checkIfExists(field, value) {
             const usersRef = collection(db, "users");
             const q = query(usersRef, where(field, "==", value));
             const snapshot = await getDocs(q);
-            return !snapshot.empty;
+            return snapshot.empty ? false : true;
         }
 
-        function displayError(message) {
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.textContent = message;
+        // Phone number validation
+        function validatePhoneNumber(phone) {
+            const phoneRegex = /^0\d{10}$/;
+            return phoneRegex.test(phone);
         }
 
+        // Sign-up button click event
         document.getElementById('signup-btn').addEventListener('click', async () => {
             const email = document.getElementById('email').value.trim();
             const username = document.getElementById('username').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const password = document.getElementById('password').value.trim();
+            const errorMessage = document.getElementById('error-message');
 
-            if (!email || !username || !phone || !password) {
-                return displayError("Please fill all fields.");
-            }
-
-            // Check if user data exists in Firestore in real-time
-            if (await checkIfUserExists("email", email)) {
-                return displayError("Email is already in use.");
-            }
-            if (await checkIfUserExists("username", username)) {
-                return displayError("Username is already taken.");
-            }
-            if (await checkIfUserExists("phone", phone)) {
-                return displayError("Phone number is already in use.");
+            // Validate phone number
+            if (!validatePhoneNumber(phone)) {
+                errorMessage.innerText = "Phone number must start with 0 and be exactly 11 digits.";
+                return;
             }
 
             try {
-                // Create user with email and password
+                // Check if email, username, or phone already exists
+                if (await checkIfExists("email", email)) {
+                    throw new Error("Email is already in use.");
+                }
+                if (await checkIfExists("username", username)) {
+                    throw new Error("Username is already taken.");
+                }
+                if (await checkIfExists("phone", phone)) {
+                    throw new Error("Phone number is already in use.");
+                }
+
+                // Create a new user with email and password
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Store user data in Firestore immediately
-                await setDoc(doc(db, "users", user.uid), {
+                // Add user details to Firestore
+                await addDoc(collection(db, "users"), {
+                    uid: user.uid,
                     email: email,
                     username: username,
-                    phone: phone,
-                    createdAt: new Date().toISOString(),
+                    phone: phone
                 });
 
-                // Redirect user after successful sign up
-                window.location.href = "account.html";
+                window.location.href = 'account.html'; // Redirect to account page on success
             } catch (error) {
-                displayError(error.message || "Error during sign-up. Please try again.");
+                errorMessage.innerText = error.message || "Error creating account. Please try again.";
             }
         });
 
@@ -215,17 +274,19 @@
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
 
-                // Save user info to Firestore
-                await setDoc(doc(db, "users", user.uid), {
+                if (await checkIfExists("email", user.email)) {
+                    throw new Error("Google account email is already registered.");
+                }
+
+                await addDoc(collection(db, "users"), {
+                    uid: user.uid,
                     email: user.email,
                     username: user.displayName || "Google User",
-                    phone: user.phoneNumber || "",
-                    createdAt: new Date().toISOString(),
+                    phone: user.phoneNumber || ""
                 });
-
-                window.location.href = "account.html";
+                window.location.href = 'account.html';
             } catch (error) {
-                displayError("Google sign-up failed. Please try again.");
+                document.getElementById('error-message').innerText = "Google sign-up failed. Please try again.";
             }
         });
 
@@ -236,17 +297,19 @@
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
 
-                // Save user info to Firestore
-                await setDoc(doc(db, "users", user.uid), {
+                if (await checkIfExists("email", user.email)) {
+                    throw new Error("Facebook account email is already registered.");
+                }
+
+                await addDoc(collection(db, "users"), {
+                    uid: user.uid,
                     email: user.email,
                     username: user.displayName || "Facebook User",
-                    phone: user.phoneNumber || "",
-                    createdAt: new Date().toISOString(),
+                    phone: user.phoneNumber || ""
                 });
-
-                window.location.href = "account.html";
+                window.location.href = 'account.html';
             } catch (error) {
-                displayError("Facebook sign-up failed. Please try again.");
+                document.getElementById('error-message').innerText = "Facebook sign-up failed. Please try again.";
             }
         });
     </script>
