@@ -151,18 +151,20 @@
     }
   </style>
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+    // Import Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
     // Firebase Configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
-      authDomain: "techzone-c96c0.firebaseapp.com",
-      projectId: "techzone-c96c0",
-      storageBucket: "techzone-c96c0.appspot.com",
-      messagingSenderId: "399698120752",
-      appId: "1:399698120752:web:40821d2140cd0d860a1df5",
+      apiKey: "AIzaSyBsQLHmUZUfmciuTIDWz4ezOZ3QTpyjg5M",
+      authDomain: "invest-ad9f0.firebaseapp.com",
+      projectId: "invest-ad9f0",
+      storageBucket: "invest-ad9f0.firebasestorage.app",
+      messagingSenderId: "539673203809",
+      appId: "1:539673203809:web:ce4f05dc9a1a2a96174620",
+      measurementId: "G-7WY9BZYZSM",
     };
 
     // Initialize Firebase
@@ -170,7 +172,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Real-time balance listener
+    // Real-time Firestore Listener for User Balance
     const setUpRealTimeBalanceListener = (userId) => {
       const userDoc = doc(db, "users", userId);
 
@@ -179,14 +181,14 @@
           const { balance } = docSnapshot.data();
           document.getElementById("userBalance").innerText = `₦${balance.toFixed(2)}`;
         } else {
-          // Initialize balance to 0 if document does not exist
+          // Initialize balance to 0 if user does not exist
           setDoc(userDoc, { balance: 0 });
           document.getElementById("userBalance").innerText = "₦0.00";
         }
       });
     };
 
-    // Log out the user
+    // Log Out User
     const logOut = async () => {
       try {
         await signOut(auth);
@@ -197,7 +199,7 @@
       }
     };
 
-    // Monitor authentication state
+    // Monitor Authentication State
     onAuthStateChanged(auth, (user) => {
       if (user) {
         // Set up real-time listener for balance updates
@@ -208,7 +210,7 @@
       }
     });
 
-    // Attach event listeners for logout
+    // Attach Event Listener for Logout Button
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("logoutButton").addEventListener("click", logOut);
     });
