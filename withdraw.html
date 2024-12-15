@@ -239,11 +239,12 @@
 
   <!-- Firebase SDK -->
   <script type="module">
+    // Import the necessary Firebase functions
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, updateDoc, setDoc, collection } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, setDoc, collection } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-    // Firebase config
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBsQLHmUZUfmciuTIDWz4ezOZ3QTpyjg5M",
       authDomain: "invest-ad9f0.firebaseapp.com",
@@ -254,49 +255,28 @@
       measurementId: "G-7WY9BZYZSM"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    let userId = null;
-
-    // Check if user is logged in
+    // Check if user is logged in, else redirect to login page
     onAuthStateChanged(auth, (user) => {
-      if (user) {
-        userId = user.uid;
-      } else {
-        window.location.href = "login.html"; // Redirect to login page if not logged in
+      if (!user) {
+        window.location.replace("login.html");  // Redirect to login page if not logged in
       }
     });
 
-    // Show relevant fields based on selected method
-    document.getElementById('method').addEventListener('change', function() {
-      const method = this.value;
-      const walletFields = document.getElementById('walletFields');
-      const bankFields = document.getElementById('bankFields');
-
-      walletFields.classList.add('hidden');
-      bankFields.classList.add('hidden');
-
-      if (method === 'wallet') {
-        walletFields.classList.remove('hidden');
-      } else if (method === 'onlineBank') {
-        bankFields.classList.remove('hidden');
-      }
-    });
-
-    // Handle form submission
+    // Handle withdraw form submission
     document.getElementById('withdrawForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      const user = auth.currentUser;
+      const userId = user.uid; // Get user UID from Firebase Auth
       const method = document.getElementById('method').value;
       const withdrawAmount = parseFloat(document.getElementById('withdrawAmount').value);
 
-      if (!userId) {
-        alert("Please log in first.");
-        return;
-      }
-
+      // Get user balance from Firestore
       const userRef = doc(db, "users", userId);
       const userSnap = await getDoc(userRef);
 
@@ -304,34 +284,41 @@
         const userData = userSnap.data();
         const currentBalance = userData.balance;
 
+        // Check if the user has sufficient balance
         if (currentBalance >= withdrawAmount) {
           if (method === 'wallet') {
             const walletId = document.getElementById('walletId').value;
             const walletName = document.getElementById('walletName').value;
 
+            // Check if the wallet exists in Firestore
             const walletRef = doc(db, "wallets", walletId);
             const walletSnap = await getDoc(walletRef);
-
             if (walletSnap.exists()) {
+              // Proceed with wallet transaction (credit recipient and debit user)
               const walletData = walletSnap.data();
               const recipientBalance = walletData.balance;
 
+              // Update the sender (user) balance
               const updatedSenderBalance = currentBalance - withdrawAmount;
               await updateDoc(userRef, { balance: updatedSenderBalance });
 
+              // Credit the recipient's wallet
               const updatedRecipientBalance = recipientBalance + withdrawAmount;
               await updateDoc(walletRef, { balance: updatedRecipientBalance });
 
+              // Store withdrawal transaction in Firestore
               await setDoc(doc(collection(db, "withdrawals")), {
                 userId,
                 amount: withdrawAmount,
                 method: "wallet",
                 walletId,
                 walletName,
-                timestamp: new Date()
+                timestamp: new Date(),
+                status: 'success'
               });
 
               alert("Withdrawal successful! You will be credited within 5-10 minutes.");
+              window.location.replace("account.html");  // Redirect after successful withdrawal
             } else {
               alert("Invalid wallet details.");
             }
@@ -340,6 +327,7 @@
             const accountNumber = document.getElementById('accountNumber').value;
             const accountName = document.getElementById('accountName').value;
 
+            // Store bank withdrawal transaction
             const updatedBalance = currentBalance - withdrawAmount;
             await updateDoc(userRef, { balance: updatedBalance });
 
@@ -350,13 +338,24 @@
               bankName,
               accountNumber,
               accountName,
-              timestamp: new Date()
+              timestamp: new Date(),
+              status: 'success'
             });
 
             alert("Withdrawal successful! You will be credited within 5-10 minutes.");
+            window.location.replace("account.html");  // Redirect after successful withdrawal
           }
         } else {
-          alert("Insufficient balance.");
+          // Insufficient balance
+          await setDoc(doc(collection(db, "withdrawals")), {
+            userId,
+            amount: withdrawAmount,
+            method,
+            timestamp: new Date(),
+            status: 'failed'
+          });
+          alert("Insufficient balance. Please add funds.");
+          window.location.replace("account.html");  // Redirect after failure
         }
       } else {
         alert("User not found.");
