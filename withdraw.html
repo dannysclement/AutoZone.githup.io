@@ -239,12 +239,11 @@
 
   <!-- Firebase SDK -->
   <script type="module">
-    // Import the necessary Firebase functions
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
     import { getFirestore, doc, getDoc, updateDoc, setDoc, collection } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
-    // Your Firebase config
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBsQLHmUZUfmciuTIDWz4ezOZ3QTpyjg5M",
       authDomain: "invest-ad9f0.firebaseapp.com",
@@ -257,29 +256,46 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth();
+    const auth = getAuth(app);
+
+    let userId = null;
 
     // Check if user is logged in
     onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = 'login.html'; // Redirect to login if not authenticated
+      if (user) {
+        userId = user.uid;
+      } else {
+        window.location.href = "login.html"; // Redirect to login page if not logged in
       }
     });
 
-    // Handle withdrawal form submission
-    const withdrawForm = document.getElementById('withdrawForm');
-    withdrawForm.addEventListener('submit', async (e) => {
+    // Show relevant fields based on selected method
+    document.getElementById('method').addEventListener('change', function() {
+      const method = this.value;
+      const walletFields = document.getElementById('walletFields');
+      const bankFields = document.getElementById('bankFields');
+
+      walletFields.classList.add('hidden');
+      bankFields.classList.add('hidden');
+
+      if (method === 'wallet') {
+        walletFields.classList.remove('hidden');
+      } else if (method === 'onlineBank') {
+        bankFields.classList.remove('hidden');
+      }
+    });
+
+    // Handle form submission
+    document.getElementById('withdrawForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const user = auth.currentUser;
-      if (!user) {
-        alert("You must be logged in to withdraw.");
-        return;
-      }
-
-      const userId = user.uid;
       const method = document.getElementById('method').value;
       const withdrawAmount = parseFloat(document.getElementById('withdrawAmount').value);
+
+      if (!userId) {
+        alert("Please log in first.");
+        return;
+      }
 
       const userRef = doc(db, "users", userId);
       const userSnap = await getDoc(userRef);
@@ -300,14 +316,12 @@
               const walletData = walletSnap.data();
               const recipientBalance = walletData.balance;
 
-              // Update the user's balance and recipient's wallet balance
               const updatedSenderBalance = currentBalance - withdrawAmount;
               await updateDoc(userRef, { balance: updatedSenderBalance });
 
               const updatedRecipientBalance = recipientBalance + withdrawAmount;
               await updateDoc(walletRef, { balance: updatedRecipientBalance });
 
-              // Log the withdrawal transaction
               await setDoc(doc(collection(db, "withdrawals")), {
                 userId,
                 amount: withdrawAmount,
@@ -348,15 +362,6 @@
         alert("User not found.");
       }
     });
-
-    // Logout function (optional)
-    function logout() {
-      signOut(auth).then(() => {
-        window.location.href = 'login.html'; // Redirect to login page after logout
-      }).catch((error) => {
-        alert("Error logging out: " + error.message);
-      });
-    }
   </script>
 </body>
 </html>
