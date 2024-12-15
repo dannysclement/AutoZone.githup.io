@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Green Energy Growth Fund</title>
+  <style>
+    /* Reset some default styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      padding: 20px;
+    }
+
+    /* Container for the investment section */
+    .investment {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      max-width: 400px;
+      margin: auto;
+      text-align: center;
+    }
+
+    /* Title for the investment section */
+    .investment h3 {
+      font-size: 24px;
+      color: #4CAF50;
+      margin-bottom: 15px;
+    }
+
+    /* Styling for the return and amount details */
+    .investment p {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    .investment .amount {
+      font-size: 20px;
+      font-weight: bold;
+      color: #2e7d32;
+      margin-bottom: 10px;
+    }
+
+    .investment .daily-return {
+      font-size: 18px;
+      color: #f57c00;
+      margin-bottom: 20px;
+    }
+
+    /* Button styling */
+    .investment button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .investment button:hover {
+      background-color: #388e3c;
+    }
+
+    /* Link styling */
+    a {
+      text-decoration: none;
+    }
+
+    /* Animation for the moving text */
+    @keyframes moveMessage {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .moving-message {
+      display: inline-block;
+      white-space: nowrap;
+      animation: moveMessage 10s linear infinite;
+      color: #2e7d32;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    /* Loading message styling */
+    .loading-message {
+      font-size: 18px;
+      color: #f57c00;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="investment">
+    <h3>Green Energy Growth Fund</h3>
+    <p>Returns: 12% annually</p>
+    <div class="amount">
+      Invest ₦1,600 to earn ₦6,200/month
+    </div>
+    <div class="daily-return">
+      Daily Return: ₦206.67
+    </div>
+    <a href="green.html">
+      <button id="proceedButton">Proceed</button>
+    </a>
+
+    <div id="welcomeMessage" class="moving-message">
+      <!-- Welcome message will be inserted here -->
+    </div>
+
+    <div id="loadingMessage" class="loading-message" style="display: none;">
+      Please wait, confirming your transaction...
+    </div>
+  </div>
+
+  <script type="module">
+    // Import the functions you need from Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBsQLHmUZUfmciuTIDWz4ezOZ3QTpyjg5M",
+      authDomain: "invest-ad9f0.firebaseapp.com",
+      projectId: "invest-ad9f0",
+      storageBucket: "invest-ad9f0.firebasestorage.app",
+      messagingSenderId: "539673203809",
+      appId: "1:539673203809:web:ce4f05dc9a1a2a96174620",
+      measurementId: "G-7WY9BZYZSM"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Investment amount
+    const investmentAmount = 1600;
+
+    // Check for the current user
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+
+        if (userDoc.exists()) {
+          const userName = userDoc.data().name;
+          const userBalance = userDoc.data().balance;
+
+          // Display the welcome message
+          const welcomeMessage = document.getElementById("welcomeMessage");
+          welcomeMessage.innerHTML = `Welcome, ${userName}! Invest and watch your earnings germinating. We love to help and hear from you.`;
+
+          // Add event listener for the proceed button
+          const proceedButton = document.getElementById("proceedButton");
+          proceedButton.addEventListener("click", async () => {
+            const loadingMessage = document.getElementById("loadingMessage");
+            loadingMessage.style.display = "block"; // Show loading message
+
+            if (userBalance >= investmentAmount) {
+              // Deduct investment amount from user's balance
+              const newBalance = userBalance - investmentAmount;
+              await updateDoc(userRef, { balance: newBalance });
+
+              // Store the investment plan in Firestore under user's data
+              const investmentRef = doc(db, "users", user.uid, "investments", new Date().toISOString());
+              await setDoc(investmentRef, {
+                investmentAmount: investmentAmount,
+                planName: "Green Energy Growth Fund",
+                timestamp: new Date()
+              });
+
+              // Hide loading message and show success
+              loadingMessage.style.display = "none";
+              alert("Transaction confirmed! Your investment has been successful.");
+            } else {
+              // Hide loading message and show insufficient funds message
+              loadingMessage.style.display = "none";
+              alert("Insufficient funds. Please check your balance.");
+            }
+          });
+        } else {
+          console.log("No user data found in Firestore.");
+        }
+      } else {
+        console.log("No user is logged in.");
+      }
+    });
+  </script>
+
+</body>
+</html>
