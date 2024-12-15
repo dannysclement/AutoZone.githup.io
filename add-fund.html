@@ -13,12 +13,35 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             height: 100vh;
             color: #333;
         }
 
-        .container {
+        .marquee {
+            width: 100%;
+            background-color: #6200ea;
+            color: white;
+            padding: 10px 0;
+            font-size: 16px;
             text-align: center;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+        }
+
+        .marquee span {
+            display: inline-block;
+            animation: marquee 10s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
         }
 
         .payment-form {
@@ -29,6 +52,7 @@
             max-width: 400px;
             padding: 20px;
             box-sizing: border-box;
+            margin-top: 60px;
             display: none; /* Hidden by default, shown when user is authenticated */
         }
 
@@ -100,67 +124,73 @@
             margin-top: 15px;
         }
 
-        .error-message {
-            color: red;
+        .notification {
+            color: green;
             font-size: 14px;
-            margin-top: 20px;
+            margin-top: 15px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="errorMessage" class="error-message" style="display: none;"></div>
-        <div class="payment-form" id="paymentFormContainer">
-            <h2>Payment Form</h2>
-            <form id="paymentForm">
-                <div class="form-group">
-                    <label for="account-name">Account Name <span class="required">*</span></label>
-                    <input type="text" id="account-name" name="account-name" value="Gloria C Nwa" class="readonly" readonly>
-                </div>
+    <div class="marquee" id="welcomeMessage" style="display: none;">
+        <span>Welcome to our Payment Portal! Ensure all details are accurate before submission.</span>
+    </div>
 
-                <div class="form-group">
-                    <label for="account-number">Account Number <span class="required">*</span></label>
-                    <input type="text" id="account-number" name="account-number" value="611-990-4348" class="readonly" readonly>
-                </div>
+    <div class="payment-form" id="paymentFormContainer">
+        <h2>Payment Form</h2>
+        <form id="paymentForm">
+            <div class="form-group">
+                <label for="account-name">Account Name <span class="required">*</span></label>
+                <input type="text" id="account-name" name="account-name" value="Gloria C Nwa" class="readonly" readonly>
+            </div>
 
-                <div class="form-group">
-                    <label for="bank-name">Bank Name <span class="required">*</span></label>
-                    <input type="text" id="bank-name" name="bank-name" value="Opay Bank" class="readonly" readonly>
-                </div>
+            <div class="form-group">
+                <label for="account-number">Account Number <span class="required">*</span></label>
+                <input type="text" id="account-number" name="account-number" value="611-990-4348" class="readonly" readonly>
+            </div>
 
-                <div class="form-group">
-                    <label for="amount">Amount (₦) <span class="required">*</span></label>
-                    <input type="number" id="amount" name="amount" placeholder="Enter amount" required>
-                </div>
+            <div class="form-group">
+                <label for="bank-name">Bank Name <span class="required">*</span></label>
+                <input type="text" id="bank-name" name="bank-name" value="Opay Bank" class="readonly" readonly>
+            </div>
 
-                <div class="form-group">
-                    <label for="payment-time">Time of Payment <span class="required">*</span></label>
-                    <input type="datetime-local" id="payment-time" name="payment-time" required>
-                </div>
+            <div class="form-group">
+                <label for="amount">Amount (₦) <span class="required">*</span></label>
+                <input type="number" id="amount" name="amount" placeholder="Enter amount" required>
+            </div>
 
-                <div class="form-group">
-                    <label for="payer-bank">Your Bank Name <span class="required">*</span></label>
-                    <input type="text" id="payer-bank" name="payer-bank" placeholder="Enter your bank name" required>
-                </div>
+            <div class="form-group">
+                <label for="payment-time">Time of Payment <span class="required">*</span></label>
+                <input type="datetime-local" id="payment-time" name="payment-time" required>
+            </div>
 
-                <div class="form-group">
-                    <label for="phone-number">Phone Number <span class="required">*</span></label>
-                    <input type="tel" id="phone-number" name="phone-number" placeholder="Enter your phone number" required>
-                </div>
+            <div class="form-group">
+                <label for="payer-bank">Your Bank Name <span class="required">*</span></label>
+                <input type="text" id="payer-bank" name="payer-bank" placeholder="Enter your bank name" required>
+            </div>
 
-                <div class="form-group">
-                    <input type="checkbox" id="confirm-payment" name="confirm-payment" required>
-                    <label for="confirm-payment">I have made the payment</label>
-                </div>
+            <div class="form-group">
+                <label for="phone-number">Phone Number <span class="required">*</span></label>
+                <input type="tel" id="phone-number" name="phone-number" placeholder="Enter your phone number" required>
+            </div>
 
-                <div class="button-group">
-                    <button type="button" id="submitPayment">Submit Payment</button>
-                </div>
+            <div class="form-group">
+                <input type="checkbox" id="confirm-payment" name="confirm-payment" required>
+                <label for="confirm-payment">I have made the payment</label>
+            </div>
 
-                <div class="note">
-                    <p>Note: Please ensure all information is accurate before submitting.</p>
-                </div>
-            </form>
+            <div class="button-group">
+                <button type="button" id="submitPayment">Submit Payment</button>
+            </div>
+
+            <div class="note">
+                <p>Note: Please ensure all information is accurate before submitting.</p>
+            </div>
+        </form>
+
+        <div class="notification" id="notification" style="display: none;">
+            You will get credited within 5 - 10 minutes!
         </div>
     </div>
 
@@ -184,14 +214,15 @@
         const db = getFirestore(app);
 
         const paymentFormContainer = document.getElementById('paymentFormContainer');
-        const errorMessage = document.getElementById('errorMessage');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const notification = document.getElementById('notification');
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                welcomeMessage.style.display = 'block';
                 paymentFormContainer.style.display = 'block';
             } else {
-                errorMessage.textContent = "You must log in to access the payment form.";
-                errorMessage.style.display = 'block';
+                window.location.href = 'login.html'; // Redirect to login if not authenticated
             }
         });
 
@@ -216,7 +247,9 @@
             }
 
             try {
-                await setDoc(doc(db, `payments/${auth.currentUser.uid}`, `${Date.now()}`), {
+                const user = auth.currentUser;
+                const userId = user.uid; // Use user's unique ID
+                await setDoc(doc(db, "payments", `${userId}_${Date.now()}`), {
                     accountName,
                     accountNumber,
                     bankName,
@@ -224,9 +257,13 @@
                     paymentTime,
                     payerBank,
                     phoneNumber,
-                    userId: auth.currentUser.uid,
+                    userId
                 });
-                alert('Payment details submitted successfully!');
+                notification.style.display = 'block';
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                    alert('Payment details submitted successfully!');
+                }, 3000);
             } catch (error) {
                 console.error('Error saving payment details:', error);
                 alert('Failed to submit payment. Please try again.');
