@@ -139,7 +139,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, updateDoc, setDoc, collection } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
     // Firebase configuration
     const firebaseConfig = {
@@ -181,23 +181,35 @@
           proceedButton.addEventListener("click", async () => {
             transactionStatus.style.display = "flex"; // Show the status overlay
 
+            const transactionsCollection = collection(db, "users", user.uid, "transactions");
+
             if (userBalance >= investmentAmount) {
               // Deduct investment amount
               const newBalance = userBalance - investmentAmount;
               await updateDoc(userRef, { balance: newBalance });
 
-              // Log the investment
-              const investmentRef = doc(db, "users", user.uid, "investments", new Date().toISOString());
-              await setDoc(investmentRef, {
-                investmentAmount: investmentAmount,
-                planName: "Green Energy Growth Fund",
-                timestamp: new Date()
+              // Log the successful transaction
+              await setDoc(doc(transactionsCollection), {
+                transactionType: "Investment",
+                amount: investmentAmount,
+                status: "Success",
+                timestamp: new Date(),
+                planName: "Green Energy Growth Fund"
               });
 
               // Show success message
               transactionStatus.className = "transaction-status success";
               transactionMessage.textContent = "Your transaction has been processed successfully!";
             } else {
+              // Log the failed transaction
+              await setDoc(doc(transactionsCollection), {
+                transactionType: "Investment",
+                amount: investmentAmount,
+                status: "Failed - Insufficient Balance",
+                timestamp: new Date(),
+                planName: "Green Energy Growth Fund"
+              });
+
               // Show insufficient balance message
               transactionStatus.className = "transaction-status failure";
               transactionMessage.textContent = "Transaction not successful due to insufficient balance.";
@@ -214,7 +226,8 @@
 
     // Redirect to dashboard
     function redirectToDashboard() {
-      window.location.href = "account.html";
+      transactionStatus.style.display = "none";
+      window.location.href = "account.html"; // Redirect to account.html
     }
   </script>
 </body>
