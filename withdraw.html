@@ -239,12 +239,11 @@
 
   <!-- Firebase SDK -->
   <script type="module">
-    // Import Firebase functions
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, updateDoc, setDoc, collection, getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, setDoc, collection } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-    // Your Firebase config
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBsQLHmUZUfmciuTIDWz4ezOZ3QTpyjg5M",
       authDomain: "invest-ad9f0.firebaseapp.com",
@@ -257,17 +256,17 @@
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    // Redirect if not logged in
-    onAuthStateChanged(auth, (user) => {
+    // Redirect to login if not authenticated
+    onAuthStateChanged(auth, user => {
       if (!user) {
         window.location.href = 'login.html';
       }
     });
 
-    // Handle withdraw form submission
+    // Handle form submit
     document.getElementById('withdrawForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -289,16 +288,19 @@
 
             const walletRef = doc(db, "wallets", walletId);
             const walletSnap = await getDoc(walletRef);
+
             if (walletSnap.exists()) {
               const walletData = walletSnap.data();
               const recipientBalance = walletData.balance;
 
+              // Update sender and recipient balances
               const updatedSenderBalance = currentBalance - withdrawAmount;
               await updateDoc(userRef, { balance: updatedSenderBalance });
 
               const updatedRecipientBalance = recipientBalance + withdrawAmount;
               await updateDoc(walletRef, { balance: updatedRecipientBalance });
 
+              // Store the transaction in Firestore
               await setDoc(doc(collection(db, "withdrawals")), {
                 userId,
                 amount: withdrawAmount,
@@ -312,19 +314,14 @@
               window.location.href = "account.html";
             } else {
               alert("Invalid wallet details.");
-              await setDoc(doc(collection(db, "withdrawals")), {
-                userId,
-                amount: withdrawAmount,
-                method: "wallet",
-                status: "failed",
-                timestamp: new Date()
-              });
+              window.location.href = "account.html";
             }
           } else if (method === 'onlineBank') {
             const bankName = document.getElementById('bankName').value;
             const accountNumber = document.getElementById('accountNumber').value;
             const accountName = document.getElementById('accountName').value;
 
+            // Store withdrawal transaction
             const updatedBalance = currentBalance - withdrawAmount;
             await updateDoc(userRef, { balance: updatedBalance });
 
@@ -343,13 +340,6 @@
           }
         } else {
           alert("Insufficient balance.");
-          await setDoc(doc(collection(db, "withdrawals")), {
-            userId,
-            amount: withdrawAmount,
-            method: "wallet",
-            status: "failed",
-            timestamp: new Date()
-          });
           window.location.href = "account.html";
         }
       } else {
@@ -358,15 +348,18 @@
       }
     });
 
-    // Toggle fields based on withdrawal method
+    // Show form based on selected method
     document.getElementById('method').addEventListener('change', (e) => {
-      const method = e.target.value;
-      if (method === 'wallet') {
-        document.getElementById('walletFields').classList.remove('hidden');
-        document.getElementById('bankFields').classList.add('hidden');
-      } else if (method === 'onlineBank') {
-        document.getElementById('walletFields').classList.add('hidden');
-        document.getElementById('bankFields').classList.remove('hidden');
+      const selectedMethod = e.target.value;
+      const walletFields = document.getElementById('walletFields');
+      const bankFields = document.getElementById('bankFields');
+
+      if (selectedMethod === 'wallet') {
+        walletFields.classList.remove('hidden');
+        bankFields.classList.add('hidden');
+      } else if (selectedMethod === 'onlineBank') {
+        bankFields.classList.remove('hidden');
+        walletFields.classList.add('hidden');
       }
     });
   </script>
