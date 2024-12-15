@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Green Energy Growth Fund</title>
   <style>
-    /* Reset some default styles */
     * {
       margin: 0;
       padding: 0;
@@ -19,7 +18,16 @@
       padding: 20px;
     }
 
-    /* Container for the investment section */
+    /* Welcome Message */
+    #welcomeMessage {
+      text-align: center;
+      font-size: 20px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      color: #4CAF50;
+    }
+
+    /* Investment Card */
     .investment {
       background: #ffffff;
       border-radius: 8px;
@@ -30,14 +38,12 @@
       text-align: center;
     }
 
-    /* Title for the investment section */
     .investment h3 {
       font-size: 24px;
       color: #4CAF50;
       margin-bottom: 15px;
     }
 
-    /* Styling for the return and amount details */
     .investment p {
       font-size: 18px;
       margin-bottom: 20px;
@@ -56,7 +62,6 @@
       margin-bottom: 20px;
     }
 
-    /* Button styling */
     .investment button {
       background-color: #4CAF50;
       color: white;
@@ -72,12 +77,7 @@
       background-color: #388e3c;
     }
 
-    /* Link styling */
-    a {
-      text-decoration: none;
-    }
-
-    /* Full Page Message */
+    /* Full Page Transaction Status */
     .transaction-status {
       position: fixed;
       top: 0;
@@ -103,29 +103,20 @@
       background-color: red;
     }
 
-    /* Loading message styling */
-    .loading-message {
-      font-size: 18px;
-      color: #f57c00;
-      font-weight: bold;
+    .status-button {
       margin-top: 20px;
-    }
-
-    /* Welcome Section */
-    .welcome-message {
-      font-size: 22px;
-      font-weight: bold;
-      color: #4CAF50;
-      margin-bottom: 20px;
-      text-align: center;
+      background-color: white;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <div class="welcome-message" id="welcomeMessage">
-    <!-- User's name will be displayed here -->
-  </div>
+  <div id="welcomeMessage">Welcome, User!</div>
 
   <div class="investment">
     <h3>Green Energy Growth Fund</h3>
@@ -136,27 +127,21 @@
     <div class="daily-return">
       Daily Return: ₦206.67
     </div>
-    <a href="green.html">
-      <button id="proceedButton">Proceed</button>
-    </a>
-
-    <div id="loadingMessage" class="loading-message" style="display: none;">
-      Please wait, confirming your transaction...
-    </div>
+    <button id="proceedButton">Proceed</button>
   </div>
 
-  <!-- Full Page Message for transaction status -->
+  <!-- Full Page Transaction Status -->
   <div id="transactionStatus" class="transaction-status">
-    <!-- Message will be dynamically inserted here -->
+    <div id="transactionMessage"></div>
+    <button class="status-button" onclick="hideTransactionStatus()">OK</button>
   </div>
 
   <script type="module">
-    // Import the functions you need from Firebase SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-    // Your web app's Firebase configuration
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBsQLHmUZUfmciuTIDWz4ezOZ3QTpyjg5M",
       authDomain: "invest-ad9f0.firebaseapp.com",
@@ -167,15 +152,19 @@
       measurementId: "G-7WY9BZYZSM"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    const proceedButton = document.getElementById("proceedButton");
+    const transactionStatus = document.getElementById("transactionStatus");
+    const transactionMessage = document.getElementById("transactionMessage");
+    const welcomeMessage = document.getElementById("welcomeMessage");
+
     // Investment amount
     const investmentAmount = 1600;
 
-    // Check for the current user
+    // Authentication state listener
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         const userRef = doc(db, "users", user.uid);
@@ -185,24 +174,19 @@
           const userName = userDoc.data().name;
           const userBalance = userDoc.data().balance;
 
-          // Display the user's name on the welcome message
-          const welcomeMessage = document.getElementById("welcomeMessage");
-          welcomeMessage.innerHTML = `Welcome, ${userName}! Invest and see your earnings germinating. We love to help and hear from you.`;
+          // Display the welcome message
+          welcomeMessage.textContent = `Welcome, ${userName}!`;
 
-          // Add event listener for the proceed button
-          const proceedButton = document.getElementById("proceedButton");
+          // Proceed Button Click Listener
           proceedButton.addEventListener("click", async () => {
-            const loadingMessage = document.getElementById("loadingMessage");
-            loadingMessage.style.display = "block"; // Show loading message
+            transactionStatus.style.display = "flex"; // Show the status overlay
 
-            const transactionStatus = document.getElementById("transactionStatus");
-            
             if (userBalance >= investmentAmount) {
-              // Deduct investment amount from user's balance
+              // Deduct investment amount
               const newBalance = userBalance - investmentAmount;
               await updateDoc(userRef, { balance: newBalance });
 
-              // Store the investment plan in Firestore under user's data
+              // Log the investment
               const investmentRef = doc(db, "users", user.uid, "investments", new Date().toISOString());
               await setDoc(investmentRef, {
                 investmentAmount: investmentAmount,
@@ -210,27 +194,28 @@
                 timestamp: new Date()
               });
 
-              // Hide loading message and show success message
-              loadingMessage.style.display = "none";
-              transactionStatus.style.display = "flex";
+              // Show success message
               transactionStatus.className = "transaction-status success";
-              transactionStatus.innerHTML = "Your transaction has been processed successfully!";
+              transactionMessage.textContent = "Your transaction has been processed successfully!";
             } else {
-              // Hide loading message and show insufficient funds message
-              loadingMessage.style.display = "none";
-              transactionStatus.style.display = "flex";
+              // Show insufficient balance message
               transactionStatus.className = "transaction-status failure";
-              transactionStatus.innerHTML = "Transaction not successful due to insufficient balance.";
+              transactionMessage.textContent = "Transaction not successful due to insufficient balance.";
             }
           });
         } else {
-          console.log("No user data found in Firestore.");
+          console.error("User document does not exist in Firestore.");
         }
       } else {
-        console.log("No user is logged in.");
+        // Redirect to login page if no user is signed in
+        window.location.href = "login.html";
       }
     });
-  </script>
 
+    // Hide the transaction status overlay
+    function hideTransactionStatus() {
+      transactionStatus.style.display = "none";
+    }
+  </script>
 </body>
 </html>
