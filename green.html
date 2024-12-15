@@ -11,6 +11,7 @@
       padding: 0;
       box-sizing: border-box;
     }
+
     body {
       font-family: 'Arial', sans-serif;
       background-color: #f4f4f9;
@@ -76,19 +77,30 @@
       text-decoration: none;
     }
 
-    /* Animation for the moving text */
-    @keyframes moveMessage {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
+    /* Full Page Message */
+    .transaction-status {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+      padding: 20px;
     }
 
-    .moving-message {
-      display: inline-block;
-      white-space: nowrap;
-      animation: moveMessage 10s linear infinite;
-      color: #2e7d32;
-      font-size: 18px;
-      margin-top: 20px;
+    .success {
+      background-color: green;
+    }
+
+    .failure {
+      background-color: red;
     }
 
     /* Loading message styling */
@@ -98,9 +110,22 @@
       font-weight: bold;
       margin-top: 20px;
     }
+
+    /* Welcome Section */
+    .welcome-message {
+      font-size: 22px;
+      font-weight: bold;
+      color: #4CAF50;
+      margin-bottom: 20px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
+
+  <div class="welcome-message" id="welcomeMessage">
+    <!-- User's name will be displayed here -->
+  </div>
 
   <div class="investment">
     <h3>Green Energy Growth Fund</h3>
@@ -115,13 +140,14 @@
       <button id="proceedButton">Proceed</button>
     </a>
 
-    <div id="welcomeMessage" class="moving-message">
-      <!-- Welcome message will be inserted here -->
-    </div>
-
     <div id="loadingMessage" class="loading-message" style="display: none;">
       Please wait, confirming your transaction...
     </div>
+  </div>
+
+  <!-- Full Page Message for transaction status -->
+  <div id="transactionStatus" class="transaction-status">
+    <!-- Message will be dynamically inserted here -->
   </div>
 
   <script type="module">
@@ -159,9 +185,9 @@
           const userName = userDoc.data().name;
           const userBalance = userDoc.data().balance;
 
-          // Display the welcome message
+          // Display the user's name on the welcome message
           const welcomeMessage = document.getElementById("welcomeMessage");
-          welcomeMessage.innerHTML = `Welcome, ${userName}! Invest and watch your earnings germinating. We love to help and hear from you.`;
+          welcomeMessage.innerHTML = `Welcome, ${userName}! Invest and see your earnings germinating. We love to help and hear from you.`;
 
           // Add event listener for the proceed button
           const proceedButton = document.getElementById("proceedButton");
@@ -169,7 +195,8 @@
             const loadingMessage = document.getElementById("loadingMessage");
             loadingMessage.style.display = "block"; // Show loading message
 
-            // Check if the user has sufficient funds
+            const transactionStatus = document.getElementById("transactionStatus");
+            
             if (userBalance >= investmentAmount) {
               // Deduct investment amount from user's balance
               const newBalance = userBalance - investmentAmount;
@@ -183,13 +210,17 @@
                 timestamp: new Date()
               });
 
-              // Hide loading message and show success
+              // Hide loading message and show success message
               loadingMessage.style.display = "none";
-              alert("Transaction confirmed! Your investment has been successful.");
+              transactionStatus.style.display = "flex";
+              transactionStatus.className = "transaction-status success";
+              transactionStatus.innerHTML = "Your transaction has been processed successfully!";
             } else {
               // Hide loading message and show insufficient funds message
               loadingMessage.style.display = "none";
-              alert("Insufficient funds. Please check your balance.");
+              transactionStatus.style.display = "flex";
+              transactionStatus.className = "transaction-status failure";
+              transactionStatus.innerHTML = "Transaction not successful due to insufficient balance.";
             }
           });
         } else {
