@@ -2,247 +2,361 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Withdrawal Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>Withdraw Money - Nigeria Online Banks</title>
   <style>
+    /* General Styles */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f4f4f4;
+      background: #f9f9f9;
+      color: #333;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
     }
 
-    .container {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    .dashboard-container {
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
       width: 100%;
-      max-width: 500px;
+      max-width: 400px;
+      margin: 10px;
+      box-sizing: border-box;
     }
 
-    h1 {
+    /* Moving Message */
+    .marquee {
+      background: #007bff;
+      color: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      white-space: nowrap;
+      position: relative;
       text-align: center;
-      margin-bottom: 20px;
-      color: #333;
     }
 
-    .form-group {
+    .marquee span {
+      display: inline-block;
+      animation: scrollText 10s linear infinite;
+      font-size: 14px;
+    }
+
+    @keyframes scrollText {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+
+    /* Form Header */
+    h2 {
+      text-align: center;
+      color: #444;
+      font-size: 20px;
       margin-bottom: 20px;
+    }
+
+    /* Form Group */
+    .form-group {
+      margin-bottom: 15px;
     }
 
     .form-group label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
       font-weight: bold;
+      font-size: 14px;
     }
 
-    .form-group input,
-    .form-group select {
+    .form-group select,
+    .form-group input {
       width: 100%;
       padding: 10px;
       border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    .form-group select {
-      cursor: pointer;
-    }
-
-    .form-group .wallet-options,
-    .form-group .bank-options {
-      display: none;
-    }
-
-    .form-group button {
-      width: 100%;
-      padding: 10px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
+      border-radius: 5px;
       font-size: 16px;
     }
 
-    .form-group button:hover {
-      background-color: #45a049;
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
     }
 
-    .error {
-      color: red;
-      font-size: 14px;
+    /* Submit Button */
+    .btn {
+      display: block;
+      width: 100%;
+      background: #007bff;
+      color: #fff;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      text-align: center;
     }
 
-    .form-group .balance-status {
-      margin-top: 10px;
+    .btn:hover {
+      background: #0056b3;
+    }
+
+    /* Hidden Fields */
+    .hidden {
+      display: none;
+    }
+
+    /* Note */
+    .note {
+      margin-top: 15px;
       font-size: 14px;
-      color: green;
+      text-align: center;
+      color: #888;
+    }
+
+    /* Responsive Design */
+    @media screen and (max-width: 768px) {
+      .dashboard-container {
+        padding: 20px;
+      }
+
+      h2 {
+        font-size: 18px;
+      }
+
+      .form-group label {
+        font-size: 13px;
+      }
+
+      .form-group select,
+      .form-group input {
+        font-size: 15px;
+        padding: 8px;
+      }
+
+      .btn {
+        font-size: 15px;
+      }
+
+      .marquee span {
+        font-size: 13px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Withdrawal Form</h1>
+  <div class="dashboard-container">
+    <!-- Moving Welcome Message -->
+    <div class="marquee">
+      <span>Welcome! If you face any issues, kindly reach out to us or visit the **Invest** section for help.</span>
+    </div>
+
+    <!-- Withdraw Money Form -->
+    <h2>Withdraw Money</h2>
     <form id="withdrawForm">
+      <!-- Select Method -->
       <div class="form-group">
-        <label for="withdrawTo">Withdraw to:</label>
-        <select id="withdrawTo" name="withdrawTo" onchange="toggleOptions()">
+        <label for="method">Select Withdrawal Method</label>
+        <select id="method" name="method" required>
+          <option value="" disabled selected>-- Choose an option --</option>
           <option value="wallet">Wallet</option>
-          <option value="bank">Bank</option>
+          <option value="onlineBank">Online Bank</option>
         </select>
       </div>
 
-      <!-- Wallet Section -->
-      <div class="form-group wallet-options">
-        <label for="walletId">Wallet ID (16 digits):</label>
-        <input type="text" id="walletId" name="walletId" placeholder="Enter Wallet ID" required>
-        <div class="error" id="walletIdError"></div>
-
-        <label for="walletName">Wallet Name:</label>
-        <input type="text" id="walletName" name="walletName" placeholder="Enter Wallet Name" required>
+      <!-- Wallet Fields -->
+      <div id="walletFields" class="hidden">
+        <div class="form-group">
+          <label for="walletId">Wallet ID</label>
+          <input type="text" id="walletId" name="walletId" placeholder="Enter your wallet ID">
+        </div>
+        <div class="form-group">
+          <label for="walletName">Wallet Name</label>
+          <input type="text" id="walletName" name="walletName" placeholder="Enter your wallet name">
+        </div>
       </div>
 
-      <!-- Bank Section -->
-      <div class="form-group bank-options">
-        <label for="bank">Select Bank:</label>
-        <select id="bank" name="bank" required>
-          <option value="">Select Bank</option>
-          <option value="Access Bank">Access Bank Plc</option>
-          <option value="Fidelity Bank">Fidelity Bank Plc</option>
-          <option value="First City Monument Bank">First City Monument Bank</option>
-          <option value="First Bank of Nigeria">First Bank of Nigeria Limited</option>
-          <option value="Guaranty Trust Holding Company">Guaranty Trust Holding Company</option>
-          <option value="Union Bank">Union Bank of Nigeria</option>
-          <option value="United Bank for Africa">United Bank for Africa</option>
-          <option value="Zenith Bank">Zenith Bank Plc</option>
-          <option value="Citibank">Citibank Nigeria Limited</option>
-          <option value="Ecobank">Ecobank Nigeria</option>
-          <option value="Keystone Bank">Keystone Bank Limited</option>
-          <option value="Optimus Bank">Optimus Bank Limited</option>
-          <option value="Polaris Bank">Polaris Bank Limited</option>
-          <option value="Stanbic IBTC Bank">Stanbic IBTC Bank Plc</option>
-          <option value="Standard Chartered">Standard Chartered</option>
-          <option value="Sterling Bank">Sterling Bank Plc</option>
-          <option value="Titan Trust Bank">Titan Trust Bank Limited</option>
-          <option value="Unity Bank">Unity Bank Plc</option>
-          <option value="Wema Bank">Wema Bank Plc</option>
-        </select>
-
-        <label for="accountNumber">Account Number (10 digits):</label>
-        <input type="text" id="accountNumber" name="accountNumber" placeholder="Enter Account Number" required>
-        <div class="error" id="accountNumberError"></div>
-
-        <label for="accountName">Account Name:</label>
-        <input type="text" id="accountName" name="accountName" placeholder="Enter Account Name" required>
+      <!-- Online Bank Fields -->
+      <div id="bankFields" class="hidden">
+        <div class="form-group">
+          <label for="bankName">Select Online Bank</label>
+          <select id="bankName" name="bankName" required>
+            <option value="" disabled selected>-- Choose your bank --</option>
+            <option value="opay">Opay</option>
+            <option value="kuda">Kuda</option>
+            <option value="palmpay">PalmPay</option>
+            <option value="moniepoint">Moniepoint</option>
+            <option value="fairmoney">FairMoney</option>
+            <option value="rubies">Rubies Bank</option>
+            <option value="vbank">V Bank</option>
+            <option value="carbon">Carbon</option>
+            <option value="eyowo">Eyowo</option>
+            <option value="alajo">Alajo</option>
+            <option value="onebank">OneBank</option>
+            <option value="mintyn">Mintyn</option>
+            <option value="squad">Squad</option>
+            <option value="sparkle">Sparkle</option>
+            <option value="providus">Providus Bank</option>
+            <option value="bankly">Bankly</option>
+            <option value="paycom">Paycom</option>
+            <option value="zenith">Zenith Online Banking</option>
+            <option value="firstmonie">FirstMonie</option>
+            <option value="chippercash">Chipper Cash</option>
+            <option value="paga">Paga</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="accountNumber">Account Number</label>
+          <input type="text" id="accountNumber" name="accountNumber" placeholder="Enter your account number" required>
+        </div>
+        <div class="form-group">
+          <label for="accountName">Account Name</label>
+          <input type="text" id="accountName" name="accountName" placeholder="Enter your account name" required>
+        </div>
       </div>
 
+      <!-- Withdraw Amount -->
       <div class="form-group">
-        <button type="submit">Withdraw</button>
-        <div class="balance-status" id="balanceStatus"></div>
+        <label for="withdrawAmount">Withdraw Amount</label>
+        <input type="number" id="withdrawAmount" name="withdrawAmount" placeholder="Enter amount to withdraw" required>
       </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn">Withdraw</button>
     </form>
+    <p class="note">Ensure your details are accurate to avoid transaction issues.</p>
   </div>
 
-  <!-- Firebase Integration -->
+  <!-- Firebase SDK -->
   <script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+    // Import the necessary Firebase functions
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc, setDoc, collection } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
-    // Your web app's Firebase configuration
+    // Your Firebase config
     const firebaseConfig = {
-      apiKey: "AIzaSyBw_hJdW_4QIBajA5LJ78Wu1a0bTyyThI8",
-      authDomain: "techzone-c96c0.firebaseapp.com",
-      projectId: "techzone-c96c0",
-      storageBucket: "techzone-c96c0.firebasestorage.app",
-      messagingSenderId: "399698120752",
-      appId: "1:399698120752:web:40821d2140cd0d860a1df5",
-      measurementId: "G-Z7VFYH20LH"
+      apiKey: "AIzaSyBsQLHmUZUfmciuTIDWz4ezOZ3QTpyjg5M",
+      authDomain: "invest-ad9f0.firebaseapp.com",
+      projectId: "invest-ad9f0",
+      storageBucket: "invest-ad9f0.firebasestorage.app",
+      messagingSenderId: "539673203809",
+      appId: "1:539673203809:web:ce4f05dc9a1a2a96174620",
+      measurementId: "G-7WY9BZYZSM"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const analytics = getAnalytics(app);
+    const auth = getAuth();
 
-    // Firebase document reference
-    let userBalance = 0; // Placeholder for user balance
-
-    // Function to toggle between wallet and bank options
-    function toggleOptions() {
-      var withdrawTo = document.getElementById("withdrawTo").value;
-      var walletOptions = document.querySelector(".wallet-options");
-      var bankOptions = document.querySelector(".bank-options");
-
-      if (withdrawTo === "wallet") {
-        walletOptions.style.display = "block";
-        bankOptions.style.display = "none";
-      } else if (withdrawTo === "bank") {
-        walletOptions.style.display = "none";
-        bankOptions.style.display = "block";
-      }
-    }
-
-    // Function to validate wallet ID (16 digits)
-    function validateWalletId(walletId) {
-      const walletIdPattern = /^\d{16}$/;
-      return walletIdPattern.test(walletId);
-    }
-
-    // Function to validate account number (10 digits)
-    function validateAccountNumber(accountNumber) {
-      const accountNumberPattern = /^\d{10}$/;
-      return accountNumberPattern.test(accountNumber);
-    }
-
-    // Event listener for form submission
-    document.getElementById("withdrawForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
-
-      const withdrawTo = document.getElementById("withdrawTo").value;
-      const walletId = document.getElementById("walletId").value;
-      const accountNumber = document.getElementById("accountNumber").value;
-
-      // Validate wallet ID and account number
-      let valid = true;
-      if (withdrawTo === "wallet" && !validateWalletId(walletId)) {
-        document.getElementById("walletIdError").innerText = "Wallet ID must be 16 digits.";
-        valid = false;
-      }
-
-      if (withdrawTo === "bank" && !validateAccountNumber(accountNumber)) {
-        document.getElementById("accountNumberError").innerText = "Account number must be 10 digits.";
-        valid = false;
-      }
-
-      if (!valid) return;
-
-      // Fetch user balance from Firebase
-      const userId = "userId"; // Placeholder for actual logged-in user ID
-      const docRef = doc(db, "users", userId);
-      const userDoc = await getDoc(docRef);
-
-      if (userDoc.exists()) {
-        userBalance = userDoc.data().balance;
-        const withdrawAmount = 1000; // Placeholder for the amount to withdraw
-
-        // Check if the balance is sufficient
-        if (userBalance >= withdrawAmount) {
-          document.getElementById("balanceStatus").innerText = "Withdrawal Successful!";
-        } else {
-          document.getElementById("balanceStatus").innerText = "Insufficient funds.";
-        }
-      } else {
-        console.error("No such document!");
-        document.getElementById("balanceStatus").innerText = "Error retrieving balance.";
+    // Check if user is logged in
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = 'login.html'; // Redirect to login if not authenticated
       }
     });
+
+    // Handle withdrawal form submission
+    const withdrawForm = document.getElementById('withdrawForm');
+    withdrawForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const user = auth.currentUser;
+      if (!user) {
+        alert("You must be logged in to withdraw.");
+        return;
+      }
+
+      const userId = user.uid;
+      const method = document.getElementById('method').value;
+      const withdrawAmount = parseFloat(document.getElementById('withdrawAmount').value);
+
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        const currentBalance = userData.balance;
+
+        if (currentBalance >= withdrawAmount) {
+          if (method === 'wallet') {
+            const walletId = document.getElementById('walletId').value;
+            const walletName = document.getElementById('walletName').value;
+
+            const walletRef = doc(db, "wallets", walletId);
+            const walletSnap = await getDoc(walletRef);
+
+            if (walletSnap.exists()) {
+              const walletData = walletSnap.data();
+              const recipientBalance = walletData.balance;
+
+              // Update the user's balance and recipient's wallet balance
+              const updatedSenderBalance = currentBalance - withdrawAmount;
+              await updateDoc(userRef, { balance: updatedSenderBalance });
+
+              const updatedRecipientBalance = recipientBalance + withdrawAmount;
+              await updateDoc(walletRef, { balance: updatedRecipientBalance });
+
+              // Log the withdrawal transaction
+              await setDoc(doc(collection(db, "withdrawals")), {
+                userId,
+                amount: withdrawAmount,
+                method: "wallet",
+                walletId,
+                walletName,
+                timestamp: new Date()
+              });
+
+              alert("Withdrawal successful! You will be credited within 5-10 minutes.");
+            } else {
+              alert("Invalid wallet details.");
+            }
+          } else if (method === 'onlineBank') {
+            const bankName = document.getElementById('bankName').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+            const accountName = document.getElementById('accountName').value;
+
+            const updatedBalance = currentBalance - withdrawAmount;
+            await updateDoc(userRef, { balance: updatedBalance });
+
+            await setDoc(doc(collection(db, "withdrawals")), {
+              userId,
+              amount: withdrawAmount,
+              method: "onlineBank",
+              bankName,
+              accountNumber,
+              accountName,
+              timestamp: new Date()
+            });
+
+            alert("Withdrawal successful! You will be credited within 5-10 minutes.");
+          }
+        } else {
+          alert("Insufficient balance.");
+        }
+      } else {
+        alert("User not found.");
+      }
+    });
+
+    // Logout function (optional)
+    function logout() {
+      signOut(auth).then(() => {
+        window.location.href = 'login.html'; // Redirect to login page after logout
+      }).catch((error) => {
+        alert("Error logging out: " + error.message);
+      });
+    }
   </script>
 </body>
 </html>
