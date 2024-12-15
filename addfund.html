@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .payment-form {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: none; /* Hidden by default, shown when user is authenticated */
+        }
+
+        .payment-form h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            border-color: #6200ea;
+            outline: none;
+        }
+
+        .form-group .readonly {
+            background-color: #f9f9f9;
+            color: #777;
+            cursor: not-allowed;
+        }
+
+        .form-group .required {
+            color: red;
+        }
+
+        .button-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .button-group button {
+            padding: 10px 20px;
+            font-size: 14px;
+            color: #fff;
+            background-color: #6200ea;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .button-group button:hover {
+            background-color: #4b00b3;
+        }
+
+        .note {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <div class="payment-form" id="paymentFormContainer">
+            <h2>Payment Form</h2>
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label for="account-name">Account Name <span class="required">*</span></label>
+                    <input type="text" id="account-name" name="account-name" value="Gloria C Nwa" class="readonly" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="account-number">Account Number <span class="required">*</span></label>
+                    <input type="text" id="account-number" name="account-number" value="12345678900" class="readonly" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="bank-name">Bank Name <span class="required">*</span></label>
+                    <input type="text" id="bank-name" name="bank-name" value="Opay Bank" class="readonly" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Amount (₦) <span class="required">*</span></label>
+                    <input type="number" id="amount" name="amount" placeholder="Enter amount" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="payment-time">Time of Payment <span class="required">*</span></label>
+                    <input type="datetime-local" id="payment-time" name="payment-time" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="payer-bank">Your Bank Name <span class="required">*</span></label>
+                    <input type="text" id="payer-bank" name="payer-bank" placeholder="Enter your bank name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone-number">Phone Number <span class="required">*</span></label>
+                    <input type="tel" id="phone-number" name="phone-number" placeholder="Enter your phone number" required>
+                </div>
+
+                <div class="form-group">
+                    <input type="checkbox" id="confirm-payment" name="confirm-payment" required>
+                    <label for="confirm-payment">I have made the payment</label>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" id="submitPayment">Submit Payment</button>
+                </div>
+
+                <div class="note">
+                    <p>Note: Please ensure all information is accurate before submitting.</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBsQLHmUZUfmciuTIDWz4ezOZ3QTpyjg5M",
+            authDomain: "invest-ad9f0.firebaseapp.com",
+            projectId: "invest-ad9f0",
+            storageBucket: "invest-ad9f0.firebasestorage.app",
+            messagingSenderId: "539673203809",
+            appId: "1:539673203809:web:ce4f05dc9a1a2a96174620",
+            measurementId: "G-7WY9BZYZSM"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const paymentFormContainer = document.getElementById('paymentFormContainer');
+        const errorMessage = document.getElementById('errorMessage');
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                paymentFormContainer.style.display = 'block';
+            } else {
+                errorMessage.textContent = "You must log in to access the payment form.";
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        document.getElementById('submitPayment').addEventListener('click', async () => {
+            const accountName = document.getElementById('account-name').value;
+            const accountNumber = document.getElementById('account-number').value;
+            const bankName = document.getElementById('bank-name').value;
+            const amount = document.getElementById('amount').value;
+            const paymentTime = document.getElementById('payment-time').value;
+            const payerBank = document.getElementById('payer-bank').value;
+            const phoneNumber = document.getElementById('phone-number').value;
+            const confirmPayment = document.getElementById('confirm-payment').checked;
+
+            if (!confirmPayment) {
+                alert('Please confirm the payment before submitting.');
+                return;
+            }
+
+            if (!amount || !paymentTime || !payerBank || !phoneNumber) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            try {
+                await setDoc(doc(db, `payments/${auth.currentUser.uid}`, `${Date.now()}`), {
+                    accountName,
+                    accountNumber,
+                    bankName,
+                    amount,
+                    paymentTime,
+                    payerBank,
+                    phoneNumber,
+                    userId: auth.currentUser.uid,
+                });
+                alert('Payment details submitted successfully!');
+            } catch (error) {
+                console.error('Error saving payment details:', error);
+                alert('Failed to submit payment. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
