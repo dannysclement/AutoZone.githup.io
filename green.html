@@ -133,12 +133,12 @@
   <!-- Full Page Transaction Status -->
   <div id="transactionStatus" class="transaction-status">
     <div id="transactionMessage"></div>
-    <button class="status-button" onclick="hideTransactionStatus()">OK</button>
+    <button class="status-button" onclick="redirectToDashboard()">OK</button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
     // Firebase configuration
@@ -212,9 +212,9 @@
       }
     });
 
-    // Hide the transaction status overlay
-    function hideTransactionStatus() {
-      transactionStatus.style.display = "none";
+    // Redirect to dashboard
+    function redirectToDashboard() {
+      window.location.href = "account.html";
     }
   </script>
 </body>
