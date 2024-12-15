@@ -169,6 +169,7 @@
             const loadingMessage = document.getElementById("loadingMessage");
             loadingMessage.style.display = "block"; // Show loading message
 
+            // Check if the user has sufficient funds
             if (userBalance >= investmentAmount) {
               // Deduct investment amount from user's balance
               const newBalance = userBalance - investmentAmount;
