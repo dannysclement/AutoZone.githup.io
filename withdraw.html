@@ -178,11 +178,11 @@
       <div id="walletFields" class="hidden">
         <div class="form-group">
           <label for="walletId">Wallet ID</label>
-          <input type="text" id="walletId" name="walletId" placeholder="Enter recipient wallet ID">
+          <input type="text" id="walletId" name="walletId" placeholder="Enter your wallet ID">
         </div>
         <div class="form-group">
           <label for="walletName">Wallet Name</label>
-          <input type="text" id="walletName" name="walletName" placeholder="Enter recipient wallet name">
+          <input type="text" id="walletName" name="walletName" placeholder="Enter your wallet name">
         </div>
       </div>
 
@@ -259,21 +259,21 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Check user login
+    // Redirect to login if not authenticated
     onAuthStateChanged(auth, user => {
       if (!user) {
         window.location.href = 'login.html';
       }
     });
 
-    // Handle Withdraw Form Submission
+    // Handle form submit
     document.getElementById('withdrawForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const userId = auth.currentUser.uid;
       const method = document.getElementById('method').value;
       const withdrawAmount = parseFloat(document.getElementById('withdrawAmount').value);
-      
+
       const userRef = doc(db, "users", userId);
       const userSnap = await getDoc(userRef);
 
@@ -293,15 +293,14 @@
               const walletData = walletSnap.data();
               const recipientBalance = walletData.balance;
 
-              // Deduct amount from sender
+              // Update sender and recipient balances
               const updatedSenderBalance = currentBalance - withdrawAmount;
               await updateDoc(userRef, { balance: updatedSenderBalance });
 
-              // Add amount to recipient
               const updatedRecipientBalance = recipientBalance + withdrawAmount;
               await updateDoc(walletRef, { balance: updatedRecipientBalance });
 
-              // Store transaction in Firestore
+              // Store the transaction in Firestore
               await setDoc(doc(collection(db, "withdrawals")), {
                 userId,
                 amount: withdrawAmount,
@@ -322,6 +321,7 @@
             const accountNumber = document.getElementById('accountNumber').value;
             const accountName = document.getElementById('accountName').value;
 
+            // Store withdrawal transaction
             const updatedBalance = currentBalance - withdrawAmount;
             await updateDoc(userRef, { balance: updatedBalance });
 
@@ -348,7 +348,7 @@
       }
     });
 
-    // Show fields based on method selection
+    // Show form based on selected method
     document.getElementById('method').addEventListener('change', (e) => {
       const selectedMethod = e.target.value;
       const walletFields = document.getElementById('walletFields');
