@@ -178,50 +178,11 @@
       <div id="walletFields" class="hidden">
         <div class="form-group">
           <label for="walletId">Wallet ID</label>
-          <input type="text" id="walletId" name="walletId" placeholder="Enter your wallet ID">
+          <input type="text" id="walletId" name="walletId" placeholder="Enter recipient's wallet ID">
         </div>
         <div class="form-group">
           <label for="walletName">Wallet Name</label>
-          <input type="text" id="walletName" name="walletName" placeholder="Enter your wallet name">
-        </div>
-      </div>
-
-      <!-- Online Bank Fields -->
-      <div id="bankFields" class="hidden">
-        <div class="form-group">
-          <label for="bankName">Select Online Bank</label>
-          <select id="bankName" name="bankName" required>
-            <option value="" disabled selected>-- Choose your bank --</option>
-            <option value="opay">Opay</option>
-            <option value="kuda">Kuda</option>
-            <option value="palmpay">PalmPay</option>
-            <option value="moniepoint">Moniepoint</option>
-            <option value="fairmoney">FairMoney</option>
-            <option value="rubies">Rubies Bank</option>
-            <option value="vbank">V Bank</option>
-            <option value="carbon">Carbon</option>
-            <option value="eyowo">Eyowo</option>
-            <option value="alajo">Alajo</option>
-            <option value="onebank">OneBank</option>
-            <option value="mintyn">Mintyn</option>
-            <option value="squad">Squad</option>
-            <option value="sparkle">Sparkle</option>
-            <option value="providus">Providus Bank</option>
-            <option value="bankly">Bankly</option>
-            <option value="paycom">Paycom</option>
-            <option value="zenith">Zenith Online Banking</option>
-            <option value="firstmonie">FirstMonie</option>
-            <option value="chippercash">Chipper Cash</option>
-            <option value="paga">Paga</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="accountNumber">Account Number</label>
-          <input type="text" id="accountNumber" name="accountNumber" placeholder="Enter your account number" required>
-        </div>
-        <div class="form-group">
-          <label for="accountName">Account Name</label>
-          <input type="text" id="accountName" name="accountName" placeholder="Enter your account name" required>
+          <input type="text" id="walletName" name="walletName" placeholder="Enter recipient's wallet name">
         </div>
       </div>
 
@@ -274,90 +235,47 @@
       const method = document.getElementById('method').value;
       const withdrawAmount = parseFloat(document.getElementById('withdrawAmount').value);
 
-      const userRef = doc(db, "users", userId);
-      const userSnap = await getDoc(userRef);
+      if (method === 'wallet') {
+        const walletId = document.getElementById('walletId').value;
+        const walletRef = doc(db, "wallets", walletId);
+        const walletSnap = await getDoc(walletRef);
 
-      if (userSnap.exists()) {
+        if (!walletSnap.exists()) {
+          alert("Invalid wallet ID. Please enter correct details.");
+          return;
+        }
+
+        const walletData = walletSnap.data();
+        const recipientBalance = walletData.balance;
+
+        const userRef = doc(db, "users", userId);
+        const userSnap = await getDoc(userRef);
         const userData = userSnap.data();
-        const currentBalance = userData.balance;
 
-        if (currentBalance >= withdrawAmount) {
-          if (method === 'wallet') {
-            const walletId = document.getElementById('walletId').value;
-            const walletName = document.getElementById('walletName').value;
+        if (userData.balance >= withdrawAmount) {
+          await updateDoc(userRef, { balance: userData.balance - withdrawAmount });
+          await updateDoc(walletRef, { balance: recipientBalance + withdrawAmount });
 
-            const walletRef = doc(db, "wallets", walletId);
-            const walletSnap = await getDoc(walletRef);
+          await setDoc(doc(collection(db, "withdrawals")), {
+            userId,
+            method: "wallet",
+            walletId,
+            withdrawAmount,
+            timestamp: new Date()
+          });
 
-            if (walletSnap.exists()) {
-              const walletData = walletSnap.data();
-              const recipientBalance = walletData.balance;
-
-              // Update sender and recipient balances
-              const updatedSenderBalance = currentBalance - withdrawAmount;
-              await updateDoc(userRef, { balance: updatedSenderBalance });
-
-              const updatedRecipientBalance = recipientBalance + withdrawAmount;
-              await updateDoc(walletRef, { balance: updatedRecipientBalance });
-
-              // Store the transaction in Firestore
-              await setDoc(doc(collection(db, "withdrawals")), {
-                userId,
-                amount: withdrawAmount,
-                method: "wallet",
-                walletId,
-                walletName,
-                timestamp: new Date()
-              });
-
-              alert("Withdrawal successful! You will be credited within 5-10 minutes.");
-              window.location.href = "account.html";
-            } else {
-              alert("Invalid wallet details.");
-            }
-          } else if (method === 'onlineBank') {
-            const bankName = document.getElementById('bankName').value;
-            const accountNumber = document.getElementById('accountNumber').value;
-            const accountName = document.getElementById('accountName').value;
-
-            // Store withdrawal transaction
-            const updatedBalance = currentBalance - withdrawAmount;
-            await updateDoc(userRef, { balance: updatedBalance });
-
-            await setDoc(doc(collection(db, "withdrawals")), {
-              userId,
-              amount: withdrawAmount,
-              method: "onlineBank",
-              bankName,
-              accountNumber,
-              accountName,
-              timestamp: new Date()
-            });
-
-            alert("Withdrawal successful! You will be credited within 5-10 minutes.");
-            window.location.href = "account.html";
-          }
+          alert("Withdrawal successful! You will be redirected to your account.");
+          window.location.href = "account.html";
         } else {
           alert("Insufficient balance.");
         }
-      } else {
-        alert("User not found.");
       }
     });
 
-    // Show form based on selected method
+    // Toggle wallet fields visibility
     document.getElementById('method').addEventListener('change', (e) => {
-      const selectedMethod = e.target.value;
       const walletFields = document.getElementById('walletFields');
-      const bankFields = document.getElementById('bankFields');
-
-      if (selectedMethod === 'wallet') {
-        walletFields.classList.remove('hidden');
-        bankFields.classList.add('hidden');
-      } else if (selectedMethod === 'onlineBank') {
-        bankFields.classList.remove('hidden');
-        walletFields.classList.add('hidden');
-      }
+      walletFields.classList.toggle('hidden', e.target.value !== 'wallet');
     });
   </script>
 </body>
