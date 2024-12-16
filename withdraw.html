@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <title>Withdraw Money - Nigeria Online Banks</title>
+  <title>Withdraw Money</title>
   <style>
     /* General Styles */
     body {
@@ -25,11 +25,8 @@
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 400px;
-      margin: 10px;
-      box-sizing: border-box;
     }
 
-    /* Moving Message */
     .marquee {
       background: #007bff;
       color: #fff;
@@ -57,24 +54,19 @@
       }
     }
 
-    /* Form Header */
     h2 {
       text-align: center;
-      color: #444;
-      font-size: 20px;
       margin-bottom: 20px;
     }
 
-    /* Form Group */
     .form-group {
       margin-bottom: 15px;
     }
 
     .form-group label {
       display: block;
-      margin-bottom: 5px;
       font-weight: bold;
-      font-size: 14px;
+      margin-bottom: 5px;
     }
 
     .form-group select,
@@ -83,26 +75,16 @@
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 5px;
-      font-size: 16px;
     }
 
-    .form-group input:focus,
-    .form-group select:focus {
-      border-color: #007bff;
-      outline: none;
-      box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-    }
-
-    /* Submit Button */
     .btn {
       display: block;
       width: 100%;
       background: #007bff;
       color: #fff;
-      padding: 12px;
+      padding: 10px;
       border: none;
       border-radius: 5px;
-      font-size: 16px;
       cursor: pointer;
       text-align: center;
     }
@@ -111,100 +93,75 @@
       background: #0056b3;
     }
 
-    /* Hidden Fields */
     .hidden {
       display: none;
-    }
-
-    /* Note */
-    .note {
-      margin-top: 15px;
-      font-size: 14px;
-      text-align: center;
-      color: #888;
-    }
-
-    /* Responsive Design */
-    @media screen and (max-width: 768px) {
-      .dashboard-container {
-        padding: 20px;
-      }
-
-      h2 {
-        font-size: 18px;
-      }
-
-      .form-group label {
-        font-size: 13px;
-      }
-
-      .form-group select,
-      .form-group input {
-        font-size: 15px;
-        padding: 8px;
-      }
-
-      .btn {
-        font-size: 15px;
-      }
-
-      .marquee span {
-        font-size: 13px;
-      }
     }
   </style>
 </head>
 <body>
   <div class="dashboard-container">
-    <!-- Moving Welcome Message -->
     <div class="marquee">
-      <span>Welcome! If you face any issues, kindly reach out to us or visit the **Invest** section for help.</span>
+      <span>Welcome! For any issues, please contact support or visit the Invest section for assistance.</span>
     </div>
 
-    <!-- Withdraw Money Form -->
     <h2>Withdraw Money</h2>
     <form id="withdrawForm">
-      <!-- Select Method -->
       <div class="form-group">
         <label for="method">Select Withdrawal Method</label>
-        <select id="method" name="method" required>
-          <option value="" disabled selected>-- Choose an option --</option>
+        <select id="method" required>
+          <option value="" disabled selected>-- Select --</option>
           <option value="wallet">Wallet</option>
-          <option value="onlineBank">Online Bank</option>
+          <option value="bank">Bank</option>
         </select>
       </div>
 
-      <!-- Wallet Fields -->
       <div id="walletFields" class="hidden">
         <div class="form-group">
           <label for="walletId">Wallet ID</label>
-          <input type="text" id="walletId" name="walletId" placeholder="Enter recipient's wallet ID">
+          <input type="text" id="walletId" placeholder="Enter Wallet ID">
         </div>
         <div class="form-group">
           <label for="walletName">Wallet Name</label>
-          <input type="text" id="walletName" name="walletName" placeholder="Enter recipient's wallet name">
+          <input type="text" id="walletName" placeholder="Enter Wallet Name">
         </div>
       </div>
 
-      <!-- Withdraw Amount -->
-      <div class="form-group">
-        <label for="withdrawAmount">Withdraw Amount</label>
-        <input type="number" id="withdrawAmount" name="withdrawAmount" placeholder="Enter amount to withdraw" required>
+      <div id="bankFields" class="hidden">
+        <div class="form-group">
+          <label for="bankName">Bank Name</label>
+          <select id="bankName" required>
+            <option value="" disabled selected>-- Select Bank --</option>
+            <option value="Opay">Opay</option>
+            <option value="Kuda">Kuda</option>
+            <option value="PalmPay">PalmPay</option>
+            <option value="FairMoney">FairMoney</option>
+            <option value="VBank">VBank</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="accountNumber">Account Number</label>
+          <input type="text" id="accountNumber" placeholder="Enter Account Number">
+        </div>
+        <div class="form-group">
+          <label for="accountName">Account Name</label>
+          <input type="text" id="accountName" placeholder="Enter Account Name">
+        </div>
       </div>
 
-      <!-- Submit Button -->
+      <div class="form-group">
+        <label for="withdrawAmount">Withdraw Amount</label>
+        <input type="number" id="withdrawAmount" placeholder="Enter Amount" required>
+      </div>
+
       <button type="submit" class="btn">Withdraw</button>
     </form>
-    <p class="note">Ensure your details are accurate to avoid transaction issues.</p>
   </div>
 
-  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc, setDoc, collection } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, updateDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBsQLHmUZUfmciuTIDWz4ezOZ3QTpyjg5M",
       authDomain: "invest-ad9f0.firebaseapp.com",
@@ -215,67 +172,103 @@
       measurementId: "G-7WY9BZYZSM"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    const auth = getAuth();
     const db = getFirestore(app);
 
-    // Redirect to login if not authenticated
-    onAuthStateChanged(auth, user => {
+    // Check if user is authenticated
+    onAuthStateChanged(auth, (user) => {
       if (!user) {
-        window.location.href = 'login.html';
+        window.location.href = "login.html";
       }
     });
 
-    // Handle form submit
-    document.getElementById('withdrawForm').addEventListener('submit', async (e) => {
+    const withdrawForm = document.getElementById("withdrawForm");
+    const methodSelect = document.getElementById("method");
+    const walletFields = document.getElementById("walletFields");
+    const bankFields = document.getElementById("bankFields");
+
+    methodSelect.addEventListener("change", () => {
+      if (methodSelect.value === "wallet") {
+        walletFields.classList.remove("hidden");
+        bankFields.classList.add("hidden");
+      } else if (methodSelect.value === "bank") {
+        bankFields.classList.remove("hidden");
+        walletFields.classList.add("hidden");
+      }
+    });
+
+    withdrawForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const userId = auth.currentUser.uid;
-      const method = document.getElementById('method').value;
-      const withdrawAmount = parseFloat(document.getElementById('withdrawAmount').value);
+      const user = auth.currentUser;
+      if (!user) return;
 
-      if (method === 'wallet') {
-        const walletId = document.getElementById('walletId').value;
+      const userId = user.uid;
+      const method = methodSelect.value;
+      const withdrawAmount = parseFloat(document.getElementById("withdrawAmount").value);
+
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        alert("User not found.");
+        return;
+      }
+
+      const userData = userSnap.data();
+      if (userData.balance < withdrawAmount) {
+        alert("Insufficient funds.");
+        return;
+      }
+
+      if (method === "wallet") {
+        const walletId = document.getElementById("walletId").value;
+        const walletName = document.getElementById("walletName").value;
+
         const walletRef = doc(db, "wallets", walletId);
         const walletSnap = await getDoc(walletRef);
 
         if (!walletSnap.exists()) {
-          alert("Invalid wallet ID. Please enter correct details.");
+          alert("Wallet not found.");
           return;
         }
 
-        const walletData = walletSnap.data();
-        const recipientBalance = walletData.balance;
+        const updatedBalance = userData.balance - withdrawAmount;
+        await updateDoc(userRef, { balance: updatedBalance });
 
-        const userRef = doc(db, "users", userId);
-        const userSnap = await getDoc(userRef);
-        const userData = userSnap.data();
+        await addDoc(collection(db, "transactions"), {
+          userId,
+          method,
+          walletId,
+          walletName,
+          amount: withdrawAmount,
+          timestamp: new Date(),
+        });
 
-        if (userData.balance >= withdrawAmount) {
-          await updateDoc(userRef, { balance: userData.balance - withdrawAmount });
-          await updateDoc(walletRef, { balance: recipientBalance + withdrawAmount });
+        alert("Withdrawal successful!");
+        window.location.href = "account.html";
+      } else if (method === "bank") {
+        const bankName = document.getElementById("bankName").value;
+        const accountNumber = document.getElementById("accountNumber").value;
+        const accountName = document.getElementById("accountName").value;
 
-          await setDoc(doc(collection(db, "withdrawals")), {
-            userId,
-            method: "wallet",
-            walletId,
-            withdrawAmount,
-            timestamp: new Date()
-          });
+        const updatedBalance = userData.balance - withdrawAmount;
+        await updateDoc(userRef, { balance: updatedBalance });
 
-          alert("Withdrawal successful! You will be redirected to your account.");
-          window.location.href = "account.html";
-        } else {
-          alert("Insufficient balance.");
-        }
+        await addDoc(collection(db, "transactions"), {
+          userId,
+          method,
+          bankName,
+          accountNumber,
+          accountName,
+          amount: withdrawAmount,
+          timestamp: new Date(),
+        });
+
+        alert("Withdrawal successful!");
+        window.location.href = "account.html";
       }
-    });
-
-    // Toggle wallet fields visibility
-    document.getElementById('method').addEventListener('change', (e) => {
-      const walletFields = document.getElementById('walletFields');
-      walletFields.classList.toggle('hidden', e.target.value !== 'wallet');
     });
   </script>
 </body>
