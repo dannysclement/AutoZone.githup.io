@@ -314,7 +314,6 @@
               window.location.href = "account.html";
             } else {
               alert("Invalid wallet details.");
-              window.location.href = "account.html";
             }
           } else if (method === 'onlineBank') {
             const bankName = document.getElementById('bankName').value;
@@ -340,11 +339,9 @@
           }
         } else {
           alert("Insufficient balance.");
-          window.location.href = "account.html";
         }
       } else {
         alert("User not found.");
-        window.location.href = "account.html";
       }
     });
 
