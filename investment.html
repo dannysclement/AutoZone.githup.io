@@ -226,14 +226,14 @@
     });
 
     // Daily Return Calculator
-    function calculateDailyReturn(amount, annualRate = 12) {
-      return (amount * annualRate / 100) / 30;
+    function calculateDailyReturn(amount) {
+      return (amount * 12 / 100) / 365; // Adjust according to actual return rate
     }
 
-    // Invest in a specific fund
-    function investIn(fundName, annualReturn) {
-      alert(`Investing in ${fundName} with annual returns of ${annualReturn}%`);
-      // Add logic to handle investment in selected fund
+    // Investment Fund Logic
+    function investIn(name, annualReturn) {
+      alert(`You chose to invest in the ${name} with an annual return of ${annualReturn}%`);
+      // Add your investment logic here
     }
   </script>
 </body>
