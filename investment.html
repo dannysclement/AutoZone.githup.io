@@ -48,7 +48,7 @@
       padding: 25px;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      max-width: 600px;
+      max-width: 800px;
       margin: auto;
       text-align: center;
     }
@@ -59,15 +59,41 @@
       margin-bottom: 15px;
     }
 
-    p {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-
     .amount, .daily-return, .balance {
       font-size: 20px;
       font-weight: bold;
       margin: 10px 0;
+    }
+
+    .plan-section, .funds-section, .market-news {
+      margin-top: 20px;
+    }
+
+    .funds-section button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 18px;
+      margin: 10px;
+      cursor: pointer;
+    }
+
+    .funds-section button:hover {
+      background-color: #45a049;
+    }
+
+    .market-news {
+      margin-top: 20px;
+      background-color: #e3f2fd;
+      padding: 15px;
+      border-radius: 5px;
+    }
+
+    .market-news p {
+      font-size: 16px;
+      font-weight: bold;
     }
 
     .no-plan {
@@ -98,6 +124,22 @@
     <p class="no-plan" id="noPlanMessage" style="display:none;">You do not have any active plans currently.</p>
   </div>
 
+  <!-- Investment Funds Section -->
+  <div class="funds-section container">
+    <h3>Choose Your Investment Fund</h3>
+    <button id="fund1" onclick="investIn('Green Energy Growth Fund', 12)">Green Energy Growth Fund</button>
+    <button id="fund2" onclick="investIn('Tech Innovation Fund', 14)">Tech Innovation Fund</button>
+    <button id="fund3" onclick="investIn('Global Real Estate Fund', 20)">Global Real Estate Fund</button>
+    <button id="fund4" onclick="investIn('Crypto Growth Portfolio', 35)">Crypto Growth Portfolio</button>
+    <button id="fund5" onclick="investIn('styostydstydstynd.twnd0', 35)">styostydstydstynd.twnd0</button>
+  </div>
+
+  <!-- Market News Section -->
+  <div class="market-news container">
+    <h3>Market News</h3>
+    <p>Tech stocks up 3%, Crypto soaring, Real Estate steady</p>
+  </div>
+
   <!-- Firebase Scripts -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
@@ -124,11 +166,6 @@
     const dailyReturn = document.getElementById("dailyReturn");
     const balanceElement = document.getElementById("balance");
     const noPlanMessage = document.getElementById("noPlanMessage");
-
-    // Daily Return Calculator
-    function calculateDailyReturn(amount, annualRate = 12) {
-      return (amount * annualRate / 100) / 30;
-    }
 
     // Fetch user data and update UI
     onAuthStateChanged(auth, async (user) => {
@@ -187,6 +224,17 @@
         console.error("User data not found.");
       }
     });
+
+    // Daily Return Calculator
+    function calculateDailyReturn(amount, annualRate = 12) {
+      return (amount * annualRate / 100) / 30;
+    }
+
+    // Invest in a specific fund
+    function investIn(fundName, annualReturn) {
+      alert(`Investing in ${fundName} with annual returns of ${annualReturn}%`);
+      // Add logic to handle investment in selected fund
+    }
   </script>
 </body>
 </html>
