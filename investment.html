@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investment Dashboard</title>
+  <!-- Google Fonts & FontAwesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #4CAF50;
+      color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 22px;
+    }
+
+    header a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 15px;
+      font-size: 18px;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      margin: auto;
+      text-align: center;
+    }
+
+    h3 {
+      color: #4CAF50;
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .amount, .daily-return, .balance {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .no-plan {
+      color: red;
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <h1>Investment Dashboard</h1>
+    <div>
+      <a href="support.html"><i class="fas fa-headset"></i> Support</a>
+      <a href="transaction-history.html"><i class="fas fa-history"></i> Transactions</a>
+    </div>
+  </header>
+
+  <!-- Investment Plan Details -->
+  <div class="container">
+    <h3>Your Investment Plan</h3>
+    <p id="planName">Fetching...</p>
+    <p class="amount" id="investmentAmount">Amount: ₦0</p>
+    <p class="daily-return" id="dailyReturn">Daily Return: ₦0</p>
+    <p class="balance" id="balance">Balance: ₦0</p>
+    <p class="no-plan" id="noPlanMessage" style="display:none;">You do not have any active plans currently.</p>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBsQLHmUZUfmciuTIDWz4ezOZ3QTpyjg5M",
+      authDomain: "invest-ad9f0.firebaseapp.com",
+      projectId: "invest-ad9f0",
+      storageBucket: "invest-ad9f0.firebasestorage.app",
+      messagingSenderId: "539673203809",
+      appId: "1:539673203809:web:ce4f05dc9a1a2a96174620",
+      measurementId: "G-7WY9BZYZSM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const planName = document.getElementById("planName");
+    const investmentAmount = document.getElementById("investmentAmount");
+    const dailyReturn = document.getElementById("dailyReturn");
+    const balanceElement = document.getElementById("balance");
+    const noPlanMessage = document.getElementById("noPlanMessage");
+
+    // Daily Return Calculator
+    function calculateDailyReturn(amount, annualRate = 12) {
+      return (amount * annualRate / 100) / 30;
+    }
+
+    // Fetch user data and update UI
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const plans = userData.plans || [];
+        let currentBalance = userData.balance || 0;
+
+        if (plans.length > 0) {
+          const userPlan = plans[0];
+          const amount = userPlan.amount || 0;
+          const planNameText = userPlan.name || "N/A";
+
+          const dailyReturnAmount = calculateDailyReturn(amount);
+
+          planName.textContent = `Plan: ${planNameText}`;
+          investmentAmount.textContent = `Amount: ₦${amount}`;
+          dailyReturn.textContent = `Daily Return: ₦${dailyReturnAmount.toFixed(2)}`;
+          balanceElement.textContent = `Balance: ₦${currentBalance.toFixed(2)}`;
+
+          let daysPassed = userPlan.days || 0;
+
+          // Daily Update
+          setInterval(async () => {
+            daysPassed += 1;
+            currentBalance += dailyReturnAmount;
+
+            if (daysPassed >= 30) {
+              await updateDoc(userRef, { 
+                balance: currentBalance,
+                plans: [] // Remove plan after 30 days
+              });
+              alert("30-day return credited successfully!");
+              window.location.reload();
+            } else {
+              await updateDoc(userRef, { 
+                balance: currentBalance,
+                "plans.0.days": daysPassed
+              });
+              balanceElement.textContent = `Balance: ₦${currentBalance.toFixed(2)}`;
+            }
+          }, 86400000); // Every 24 hours
+        } else {
+          planName.textContent = "";
+          noPlanMessage.style.display = "block";
+        }
+      } else {
+        console.error("User data not found.");
+      }
+    });
+  </script>
+</body>
+</html>
