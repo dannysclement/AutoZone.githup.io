@@ -4,10 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Investment Dashboard</title>
+
   <!-- Fonts and Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
   <style>
+    /* General Styles */
     * {
       margin: 0;
       padding: 0;
@@ -21,6 +24,7 @@
       padding: 20px;
     }
 
+    /* Header Styles */
     header {
       display: flex;
       justify-content: space-between;
@@ -43,6 +47,7 @@
       font-size: 18px;
     }
 
+    /* Container Styles */
     .container {
       background-color: #fff;
       padding: 25px;
@@ -50,19 +55,20 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       max-width: 800px;
       margin: auto;
-      text-align: center;
     }
 
-    h3 {
+    .container h3 {
       color: #4CAF50;
       font-size: 24px;
       margin-bottom: 15px;
+      text-align: center;
     }
 
     .amount, .daily-return, .balance {
       font-size: 20px;
       font-weight: bold;
       margin: 10px 0;
+      text-align: center;
     }
 
     .no-plan {
@@ -70,11 +76,48 @@
       font-size: 18px;
       font-weight: bold;
       margin-top: 15px;
+      text-align: center;
+    }
+
+    /* Transactions Table */
+    .transactions-section {
+      margin-top: 30px;
+    }
+
+    .transactions-section h3 {
+      margin-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    table th, table td {
+      text-align: left;
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+
+    table th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    table tbody tr:nth-child(even) {
+      background-color: #f4f4f9;
+    }
+
+    .no-transactions {
+      color: #666;
+      text-align: center;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
+  <!-- Header Section -->
   <header>
     <h1>Investment Dashboard</h1>
     <div>
@@ -90,39 +133,62 @@
     <p class="amount" id="investmentAmount">Amount: ₦0</p>
     <p class="daily-return" id="dailyReturn">Daily Return: ₦0</p>
     <p class="balance" id="balance">Balance: ₦0</p>
-    <p class="no-plan" id="noPlanMessage" style="display:none;">You do not have any active plans currently.</p>
+    <p class="no-plan" id="noPlanMessage" style="display: none;">You do not have any active plans currently.</p>
   </div>
 
-  <!-- Firebase Scripts -->
+  <!-- Transactions Section -->
+  <div class="container transactions-section">
+    <h3>Transaction History</h3>
+    <table id="transactionsTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="transactionsBody">
+        <tr>
+          <td colspan="4" class="no-transactions">No transactions found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Firebase Integration -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, onSnapshot, updateDoc, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-    // Firebase configuration
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBsQLHmUZUfmciuTIDWz4ezOZ3QTpyjg5M",
       authDomain: "invest-ad9f0.firebaseapp.com",
       projectId: "invest-ad9f0",
-      storageBucket: "invest-ad9f0.firebasestorage.app",
+      storageBucket: "invest-ad9f0.appspot.com",
       messagingSenderId: "539673203809",
       appId: "1:539673203809:web:ce4f05dc9a1a2a96174620",
       measurementId: "G-7WY9BZYZSM"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // DOM Elements
     const planName = document.getElementById("planName");
     const investmentAmount = document.getElementById("investmentAmount");
     const dailyReturn = document.getElementById("dailyReturn");
     const balanceElement = document.getElementById("balance");
     const noPlanMessage = document.getElementById("noPlanMessage");
+    const transactionsBody = document.getElementById("transactionsBody");
 
     let dailyReturnAmount = 0;
 
-    // Fetch user data and update UI
+    // Auth State Listener
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "login.html";
@@ -130,21 +196,22 @@
       }
 
       const userRef = doc(db, "users", user.uid);
+      const transactionsRef = collection(db, "users", user.uid, "transactions");
 
-      // Real-time listener for balance and transactions
+      // Fetch and update investment details
       onSnapshot(userRef, (doc) => {
         if (doc.exists()) {
           const userData = doc.data();
           const plans = userData.plans || [];
           const currentBalance = userData.balance || 0;
 
-          // Update balance live
           balanceElement.textContent = `Balance: ₦${currentBalance.toFixed(2)}`;
 
           if (plans.length > 0) {
             const userPlan = plans[0];
             const amount = userPlan.amount || 0;
             const planNameText = userPlan.name || "N/A";
+
             dailyReturnAmount = calculateDailyReturn(amount);
 
             planName.textContent = `Plan: ${planNameText}`;
@@ -152,45 +219,44 @@
             dailyReturn.textContent = `Daily Return: ₦${dailyReturnAmount.toFixed(2)}`;
             noPlanMessage.style.display = "none";
           } else {
-            planName.textContent = "";
-            investmentAmount.textContent = "Amount: ₦0";
-            dailyReturn.textContent = "Daily Return: ₦0";
-            noPlanMessage.style.display = "block";
+            displayNoPlan();
           }
         } else {
           console.error("User data not found.");
         }
       });
 
-      // Auto-credit daily return every 24 hours
-      setInterval(async () => {
-        const docSnap = await getDoc(userRef);
-        if (docSnap.exists()) {
-          const userData = docSnap.data();
-          const plans = userData.plans || [];
-          let currentBalance = userData.balance || 0;
+      // Fetch and display user transactions
+      const transactionsQuery = query(transactionsRef, orderBy("date", "desc"));
+      const querySnapshot = await getDocs(transactionsQuery);
 
-          if (plans.length > 0) {
-            const userPlan = plans[0];
-            const amount = userPlan.amount || 0;
-            dailyReturnAmount = calculateDailyReturn(amount);
-
-            currentBalance += dailyReturnAmount;
-
-            // Update Firestore with new balance
-            await updateDoc(userRef, {
-              balance: currentBalance
-            });
-
-            console.log("Daily return added:", dailyReturnAmount);
-          }
-        }
-      }, 86400000); // 24 hours in milliseconds
+      if (!querySnapshot.empty) {
+        transactionsBody.innerHTML = ""; // Clear placeholder
+        querySnapshot.forEach((transactionDoc) => {
+          const transaction = transactionDoc.data();
+          const transactionRow = `
+            <tr>
+              <td>${new Date(transaction.date.toDate()).toLocaleDateString()}</td>
+              <td>${transaction.type || "N/A"}</td>
+              <td>₦${transaction.amount || 0}</td>
+              <td>${transaction.status || "Pending"}</td>
+            </tr>
+          `;
+          transactionsBody.innerHTML += transactionRow;
+        });
+      }
     });
 
-    // Daily Return Calculator
+    // Helper Functions
     function calculateDailyReturn(amount) {
-      return (amount * 12 / 100) / 30; // Adjust daily return logic as needed
+      return (amount * 0.12) / 30; // Calculate 12% annualized daily return
+    }
+
+    function displayNoPlan() {
+      planName.textContent = "";
+      investmentAmount.textContent = "Amount: ₦0";
+      dailyReturn.textContent = "Daily Return: ₦0";
+      noPlanMessage.style.display = "block";
     }
   </script>
 </body>
