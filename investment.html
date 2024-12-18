@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Investment Dashboard</title>
-  <!-- Google Fonts & FontAwesome -->
+  <!-- Fonts and Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
@@ -97,7 +97,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
     // Firebase configuration
     const firebaseConfig = {
@@ -120,6 +120,8 @@
     const balanceElement = document.getElementById("balance");
     const noPlanMessage = document.getElementById("noPlanMessage");
 
+    let dailyReturnAmount = 0;
+
     // Fetch user data and update UI
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
@@ -128,61 +130,67 @@
       }
 
       const userRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userRef);
 
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const transactions = userData.transactions || [];
-        let currentBalance = userData.balance || 0;
+      // Real-time listener for balance and transactions
+      onSnapshot(userRef, (doc) => {
+        if (doc.exists()) {
+          const userData = doc.data();
+          const plans = userData.plans || [];
+          const currentBalance = userData.balance || 0;
 
-        if (transactions.length > 0) {
-          const userPlan = transactions[0];
-          const amount = userPlan.amount || 0;
-          const planNameText = userPlan.name || "N/A";
-          const dailyReturnAmount = calculateDailyReturn(amount);
-
-          // Update UI
-          planName.textContent = `Plan: ${planNameText}`;
-          investmentAmount.textContent = `Amount: ₦${amount}`;
-          dailyReturn.textContent = `Daily Return: ₦${dailyReturnAmount.toFixed(2)}`;
+          // Update balance live
           balanceElement.textContent = `Balance: ₦${currentBalance.toFixed(2)}`;
 
-          let daysPassed = userPlan.days || 0;
+          if (plans.length > 0) {
+            const userPlan = plans[0];
+            const amount = userPlan.amount || 0;
+            const planNameText = userPlan.name || "N/A";
+            dailyReturnAmount = calculateDailyReturn(amount);
 
-          // Daily Update Logic
-          const interval = setInterval(async () => {
-            daysPassed += 1;
+            planName.textContent = `Plan: ${planNameText}`;
+            investmentAmount.textContent = `Amount: ₦${amount}`;
+            dailyReturn.textContent = `Daily Return: ₦${dailyReturnAmount.toFixed(2)}`;
+            noPlanMessage.style.display = "none";
+          } else {
+            planName.textContent = "";
+            investmentAmount.textContent = "Amount: ₦0";
+            dailyReturn.textContent = "Daily Return: ₦0";
+            noPlanMessage.style.display = "block";
+          }
+        } else {
+          console.error("User data not found.");
+        }
+      });
+
+      // Auto-credit daily return every 24 hours
+      setInterval(async () => {
+        const docSnap = await getDoc(userRef);
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          const plans = userData.plans || [];
+          let currentBalance = userData.balance || 0;
+
+          if (plans.length > 0) {
+            const userPlan = plans[0];
+            const amount = userPlan.amount || 0;
+            dailyReturnAmount = calculateDailyReturn(amount);
+
             currentBalance += dailyReturnAmount;
 
-            if (daysPassed >= 30) {
-              clearInterval(interval); // Stop the interval
-              await updateDoc(userRef, {
-                balance: currentBalance,
-                transactions: [] // Remove plan after 30 days
-              });
-              alert("30-day return credited successfully!");
-              window.location.reload();
-            } else {
-              await updateDoc(userRef, {
-                balance: currentBalance,
-                "transactions.0.days": daysPassed
-              });
-              balanceElement.textContent = `Balance: ₦${currentBalance.toFixed(2)}`;
-            }
-          }, 86400000); // Run every 24 hours
-        } else {
-          // No transactions found
-          planName.textContent = "";
-          noPlanMessage.style.display = "block";
+            // Update Firestore with new balance
+            await updateDoc(userRef, {
+              balance: currentBalance
+            });
+
+            console.log("Daily return added:", dailyReturnAmount);
+          }
         }
-      } else {
-        console.error("User data not found.");
-      }
+      }, 86400000); // 24 hours in milliseconds
     });
 
-    // Calculate daily return
+    // Daily Return Calculator
     function calculateDailyReturn(amount) {
-      return (amount * 12 / 100) / 30; // Adjust according to the rate
+      return (amount * 12 / 100) / 30; // Adjust daily return logic as needed
     }
   </script>
 </body>
