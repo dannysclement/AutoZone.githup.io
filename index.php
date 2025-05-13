@@ -1,18 +1,20 @@
 <?php
-// Define hardcoded credentials
-$correct_username = "admin";
-$correct_password = "1234";
-$login_success = false;
-$error_message = "";
+$login_error = "";
+$login_success = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
+    // Hardcoded credentials (for demonstration purposes)
+    $valid_username = "admin";
+    $valid_password = "1234";
 
-    if ($username === $correct_username && $password === $correct_password) {
-        $login_success = true;
+    // Get input from form
+    $username = $_POST["username"];
+    $password = $_POST["password"];
+
+    if ($username === $valid_username && $password === $valid_password) {
+        $login_success = "✅ Login successful. Welcome, $username!";
     } else {
-        $error_message = "Invalid username or password!";
+        $login_error = "❌ Invalid username or password.";
     }
 }
 ?>
@@ -20,99 +22,101 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Simple Login Form</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f2f2f2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #2b5876, #4e4376);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
 
-        .login-container {
-            background: white;
-            padding: 30px 25px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 12px rgba(0,0,0,0.1);
-            width: 300px;
-        }
+    .login-container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      width: 100%;
+      max-width: 350px;
+    }
 
-        h2 {
-            text-align: center;
-            margin-bottom: 25px;
-        }
+    .login-container h2 {
+      margin-bottom: 20px;
+      text-align: center;
+      color: #4e4376;
+    }
 
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px 8px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
 
-        input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            background: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4e4376;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
 
-        input[type="submit"]:hover {
-            background: #0056b3;
-        }
+    button:hover {
+      background-color: #2b5876;
+    }
 
-        .error {
-            color: red;
-            text-align: center;
-            margin-bottom: 10px;
-        }
+    .message {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: bold;
+    }
 
-        .success-message {
-            background: #e0fce0;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-    </style>
-    <script>
-        function validateForm() {
-            const username = document.forms["loginForm"]["username"].value;
-            const password = document.forms["loginForm"]["password"].value;
-            if (username === "" || password === "") {
-                alert("Username and password are required.");
-                return false;
-            }
-            return true;
-        }
-    </script>
+    .error {
+      color: red;
+    }
+
+    .success {
+      color: green;
+    }
+  </style>
 </head>
 <body>
+  <div class="login-container">
+    <h2>Login</h2>
+    <form method="post" onsubmit="return validateForm()">
+      <input type="text" name="username" id="username" placeholder="Username" />
+      <input type="password" name="password" id="password" placeholder="Password" />
+      <button type="submit">Login</button>
+    </form>
+    
+    <?php if ($login_error): ?>
+      <div class="message error"><?php echo $login_error; ?></div>
+    <?php elseif ($login_success): ?>
+      <div class="message success"><?php echo $login_success; ?></div>
+    <?php endif; ?>
+  </div>
 
-<?php if ($login_success): ?>
-    <div class="success-message">
-        <h2>Welcome, <?= htmlspecialchars($correct_username) ?>!</h2>
-        <p>You have successfully logged in.</p>
-    </div>
-<?php else: ?>
-    <div class="login-container">
-        <h2>Login</h2>
-        <?php if ($error_message): ?>
-            <div class="error"><?= htmlspecialchars($error_message) ?></div>
-        <?php endif; ?>
-        <form name="loginForm" method="post" onsubmit="return validateForm();">
-            <input type="text" name="username" placeholder="Username">
-            <input type="password" name="password" placeholder="Password">
-            <input type="submit" value="Login">
-        </form>
-    </div>
-<?php endif; ?>
+  <script>
+    function validateForm() {
+      var username = document.getElementById("username").value.trim();
+      var password = document.getElementById("password").value.trim();
 
+      if (username === "" || password === "") {
+        alert("Please fill in both username and password.");
+        return false;
+      }
+      return true;
+    }
+  </script>
 </body>
 </html>
